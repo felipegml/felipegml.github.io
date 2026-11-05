@@ -6,6 +6,7 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   --ink-muted: #817a75;
+  --slot: clamp(210px, 24vw, 420px);
 }
 
 * {
@@ -153,8 +154,9 @@ button {
 }
 
 .wall-set {
+  --slot-size: max(var(--slot), calc(100vw / var(--artwork-count)));
   position: relative;
-  width: calc(var(--panel-count) * 100vw);
+  width: calc(var(--artwork-count) * var(--slot-size));
   height: 100%;
   flex: none;
 }
@@ -174,7 +176,7 @@ button {
   position: absolute;
   top: var(--top);
   left: var(--left);
-  width: clamp(175px, 30vw, 380px);
+  width: calc(var(--slot-size) * 0.94);
   padding: 0;
   border: 0;
   background: transparent;
@@ -186,7 +188,7 @@ button {
 .art-card img {
   display: block;
   width: 100%;
-  aspect-ratio: 0.8;
+  height: auto;
   border: 1px solid rgba(255, 255, 255, 0.84);
   border-radius: 0.4rem;
   background: #f0e9e3;
@@ -355,6 +357,20 @@ button {
   transition: transform 0.6s ease;
 }
 
+.modal-flipper.no-transition {
+  transition: none;
+}
+
+.image-dialog[open] .modal-card {
+  animation: modal-fade-in 220ms ease;
+}
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
 .modal-card.is-flipped .modal-flipper {
   transform: rotateY(180deg);
 }
@@ -396,6 +412,18 @@ button {
 .modal-back p {
   margin: 0;
   line-height: 1.6;
+}
+
+.modal-signature {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  filter: brightness(0);
+  user-select: none;
+  pointer-events: none;
 }
 
 .modal-close {

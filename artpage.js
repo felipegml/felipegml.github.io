@@ -1,4 +1,10 @@
+// true: use the internal data in artworks-data.js (works from file:// with no server).
+// false: fetch the external artworks.json (use for the published site).
+const DEVELOPER_MODE = true;
+
 const galleryError = document.getElementById("galleryError");
+
+document.addEventListener("contextmenu", (event) => event.preventDefault());
 
 function showGalleryError(error) {
   console.error("Unable to load the illustration gallery.", error);
@@ -18,6 +24,7 @@ function startGallery(artworks) {
   const imageDialog = document.getElementById("imageDialog");
   const modalImage = document.getElementById("modalImage");
   const modalCard = document.getElementById("modalCard");
+  const modalFlipper = document.getElementById("modalFlipper");
   const modalTitle = document.getElementById("modalTitle");
   const modalDescription = document.getElementById("modalDescription");
   let cycleWidth = 0;
@@ -43,17 +50,12 @@ function startGallery(artworks) {
       { top: "36%" },
       { top: "66%" }
     ];
-    const positionIndex = index % positions.length;
-    const position = positions[positionIndex];
-    const panelIndex = Math.floor(index / positions.length);
-    const artworksInPanel = Math.min(positions.length, artworks.length - panelIndex * positions.length);
-    const columnPosition = ((positionIndex + 0.5) / artworksInPanel) * 100;
     const card = document.createElement("button");
     card.className = "art-card";
     card.type = "button";
-    card.style.setProperty("--left", `calc(${panelIndex * 100}vw + ${columnPosition}vw)`);
+    card.style.setProperty("--left", `calc(${index + 0.5} * var(--slot-size))`);
     card.style.setProperty("--mobile-left", `${(index + 0.5) * 100}vw`);
-    card.style.setProperty("--top", position.top);
+    card.style.setProperty("--top", positions[index % positions.length].top);
     card.style.setProperty("--scale", desktopArtworkScales[index]);
     card.style.setProperty("--mobile-scale", mobileArtworkScales[index]);
     card.style.setProperty("--float-duration", `${5 + index * 0.7}s`);
@@ -83,7 +85,6 @@ function startGallery(artworks) {
     for (let setIndex = 0; setIndex < 3; setIndex += 1) {
       const set = document.createElement("div");
       set.className = "wall-set";
-      set.style.setProperty("--panel-count", String(Math.ceil(artworks.length / 4)));
       set.style.setProperty("--artwork-count", String(artworks.length));
       if (setIndex !== 1) {
         set.setAttribute("aria-hidden", "true");
@@ -126,22 +127,24 @@ function startGallery(artworks) {
     if (!lastOpenedCard || card.closest(".wall-set") === wallSets[1]) {
       lastOpenedCard = card;
     }
-    showActiveArtwork();
-    imageDialog.showModal();
+    showActiveArtwork().then(() => imageDialog.showModal());
   }
 
-  function setFlipped(flipped) {
+  function setFlipped(flipped, animate = true) {
+    modalFlipper.classList.toggle("no-transition", !animate);
     modalCard.classList.toggle("is-flipped", flipped);
     modalCard.setAttribute("aria-pressed", String(flipped));
   }
 
+  // Resolves once the image is decoded so the dialog never shows a half-sized image.
   function showActiveArtwork() {
     const artwork = artworks[activeArtworkIndex];
-    setFlipped(false);
-    modalImage.src = artwork.full;
-    modalImage.alt = artwork.alt;
+    setFlipped(false, false);
     modalTitle.textContent = artwork.title;
     modalDescription.textContent = artwork.description;
+    modalImage.alt = artwork.alt;
+    modalImage.src = artwork.full;
+    return modalImage.decode().catch(() => {});
   }
 
   function changeArtwork(direction) {
@@ -291,22 +294,31 @@ function startGallery(artworks) {
   measureWall();
 }
 
-fetch(new URL("artworks.json", window.location.href))
-  .then((response) => {
+function validateArtworks(artworks) {
+  if (!Array.isArray(artworks) || artworks.length === 0) {
+    throw new TypeError("Artwork manifest must be a non-empty array.");
+  }
+  artworks.forEach((artwork, index) => {
+    if (!artwork || ["title", "alt", "description", "thumb", "full"].some((key) => typeof artwork[key] !== "string" || !artwork[key].trim())) {
+      throw new TypeError(`Artwork at index ${index} must include title, alt, description, thumb, and full strings.`);
+    }
+  });
+  return artworks;
+}
+
+function loadArtworks() {
+  if (DEVELOPER_MODE) {
+    return Promise.resolve(window.INTERNAL_ARTWORKS);
+  }
+  return fetch(new URL("artworks.json", window.location.href)).then((response) => {
     if (!response.ok) {
       throw new Error(`Artwork manifest request failed with status ${response.status}.`);
     }
     return response.json();
-  })
-  .then((artworks) => {
-    if (!Array.isArray(artworks) || artworks.length === 0) {
-      throw new TypeError("Artwork manifest must be a non-empty array.");
-    }
-    artworks.forEach((artwork, index) => {
-      if (!artwork || ["title", "alt", "description", "thumb", "full"].some((key) => typeof artwork[key] !== "string" || !artwork[key].trim())) {
-        throw new TypeError(`Artwork at index ${index} must include title, alt, description, thumb, and full strings.`);
-      }
-    });
-    startGallery(artworks);
-  })
+  });
+}
+
+loadArtworks()
+  .then(validateArtworks)
+  .then(startGallery)
   .catch(showGalleryError);

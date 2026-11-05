@@ -26,5 +26,19 @@
     "description": "A small striped vase holding a handful of colorful wildflowers, picked on a slow afternoon.",
     "thumb": "assets/art/wildflower-notes-thumb.svg",
     "full": "assets/art/wildflower-notes-full.svg"
+  },
+  {
+    "title": "Paper Boats",
+    "alt": "Square illustration of two small paper boats floating on a calm blue sea.",
+    "description": "Square test artwork: two paper boats drifting across a calm sea under a pale sun.",
+    "thumb": "assets/art/paper-boats-thumb.svg",
+    "full": "assets/art/paper-boats-full.svg"
+  },
+  {
+    "title": "Night Market",
+    "alt": "Landscape illustration of a lantern-lit night market under a purple sky.",
+    "description": "Landscape test artwork: stalls glowing under strings of lanterns on a purple night.",
+    "thumb": "assets/art/night-market-thumb.svg",
+    "full": "assets/art/night-market-full.svg"
   }
 ]

@@ -17,7 +17,7 @@
   <div class="interface">
     <a class="icon-button home-link" href="index.html" aria-label="Back to home">
       <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
-        <path d="M14.5 5.5 8 12l6.5 6.5M8.5 12H20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+        <path d="M10.5 5.5 4 12l6.5 6.5M4.5 12H20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
       </svg>
     </a>
     <div class="wall-controls" aria-label="Move along the gallery wall">
@@ -41,11 +41,12 @@
 
   <dialog class="image-dialog" id="imageDialog" aria-label="Full-size illustration">
     <div class="modal-card" id="modalCard" role="button" tabindex="0" aria-pressed="false" aria-label="Flip illustration to read its description">
-      <div class="modal-flipper">
+      <div class="modal-flipper" id="modalFlipper">
         <img class="modal-art" id="modalImage" alt="">
         <div class="modal-back" id="modalBack">
           <h2 id="modalTitle"></h2>
           <p id="modalDescription"></p>
+          <img class="modal-signature" src="assets/art/signature.png" alt="" width="50" height="50" draggable="false">
         </div>
       </div>
     </div>
@@ -68,6 +69,7 @@
     </nav>
   </dialog>
 
+  <script src="artworks-data.js" defer></script>
   <script src="artpage.js" defer></script>
 </body>
 </html>
