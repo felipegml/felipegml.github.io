@@ -1,11 +1,11 @@
 :root {
   color-scheme: light;
   font-family: "Trebuchet MS", Arial, sans-serif;
-  color: #26221f;
-  background: #fffdfb;
+  color: #146466;
+  background: #e2e2c4;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --ink-muted: #817a75;
+  --ink-muted: #146466;
   --slot: clamp(210px, 24vw, 420px);
 }
 
@@ -24,8 +24,8 @@ body {
 
 body {
   background:
-    radial-gradient(ellipse at 50% 45%, rgba(251, 239, 230, 0.62), transparent 49%),
-    #fffdfb;
+    radial-gradient(ellipse at 50% 45%,     rgba(90, 171, 169, 0.35), transparent 55%),
+        #e2e2c4;
 }
 
 button {
@@ -117,7 +117,7 @@ button {
 }
 
 .wall-viewport:focus-visible {
-  outline: 2px solid rgba(189, 142, 119, 0.55);
+  outline: 2px solid rgba(201, 47, 28, 0.55);
   outline-offset: -4px;
 }
 
@@ -130,12 +130,12 @@ button {
   margin: 0;
   padding: 1rem 1.25rem;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(38, 34, 31, 0.12);
+  border: 1px solid rgba(20, 100, 102, 0.25);
   border-radius: 0.75rem;
-  background: rgba(255, 253, 251, 0.94);
-  color: #5b332b;
+  background: rgba(226, 226, 196, 0.94);
+  color: #c92f1c;
   text-align: center;
-  box-shadow: 0 0.75rem 2rem rgba(38, 34, 31, 0.1);
+  box-shadow: 0 0.75rem 2rem rgba(20, 100, 102, 0.18);
 }
 
 .gallery-error[hidden] {
@@ -166,8 +166,8 @@ button {
   z-index: 1;
   inset: 0;
   background:
-    radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(122, 102, 88, 0.045) 100%),
-    linear-gradient(180deg, rgba(255, 253, 251, 0.16), transparent 22%, transparent 78%, rgba(255, 253, 251, 0.26));
+    radial-gradient(ellipse at 50% 45%, transparent 30%,     rgba(20, 100, 102, 0.08) 100%),
+        linear-gradient(180deg, rgba(226, 226, 196, 0.16), transparent 22%, transparent 78%, rgba(226, 226, 196, 0.26));
   content: "";
   pointer-events: none;
 }
@@ -189,12 +189,12 @@ button {
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(226, 226, 196, 0.9);
   border-radius: 0.4rem;
-  background: #f0e9e3;
+  background: #5aaba9;
   box-shadow:
-    0 24px 58px rgba(67, 47, 36, 0.16),
-    0 4px 14px rgba(67, 47, 36, 0.09);
+    0 24px 58px rgba(20, 100, 102, 0.28),
+    0 4px 14px rgba(20, 100, 102, 0.16);
   object-fit: cover;
   pointer-events: none;
   transition: box-shadow 250ms ease;
@@ -215,17 +215,17 @@ button {
 .art-card:hover img,
 .art-card:focus-visible img {
   box-shadow:
-    0 32px 78px rgba(67, 47, 36, 0.23),
-    0 8px 22px rgba(67, 47, 36, 0.13);
+    0 32px 78px rgba(20, 100, 102, 0.38),
+    0 8px 22px rgba(20, 100, 102, 0.22);
 }
 
 .art-card:focus-visible {
-  outline: 2px solid #bd8e77;
+  outline: 2px solid #c92f1c;
   outline-offset: 6px;
 }
 
 .icon-button:focus-visible {
-  outline: 2px solid #bd8e77;
+  outline: 2px solid #c92f1c;
   outline-offset: 6px;
 }
 
@@ -241,18 +241,19 @@ button {
   width: 2.8rem;
   height: 2.8rem;
   place-items: center;
-  border: 1px solid rgba(123, 108, 99, 0.18);
+  border: 1px solid rgba(20, 100, 102, 0.3);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.76);
-  box-shadow: 0 8px 22px rgba(67, 47, 36, 0.06);
-  color: #635950;
+  background: rgba(226, 226, 196, 0.85);
+  box-shadow: 0 8px 22px rgba(20, 100, 102, 0.14);
+  color: #146466;
   cursor: pointer;
   pointer-events: auto;
   transition: background 180ms ease, transform 180ms ease;
 }
 
 .icon-button:hover {
-  background: #fff;
+  background: #c92f1c;
+  color: #e2e2c4;
   transform: scale(1.06);
 }
 
@@ -304,11 +305,11 @@ button {
   padding: 0.35rem 0.65rem;
   overflow-y: auto;
   border-radius: 0.5rem;
-  background: rgba(255, 253, 251, 0.76);
+  background: rgba(226, 226, 196, 0.8);
   backdrop-filter: blur(8px);
   transform: translateX(-50%);
   margin: 0;
-  color: #a49b94;
+  color: #146466;
   font-size: 0.62rem;
   line-height: 1.4;
   text-align: center;
@@ -330,11 +331,11 @@ button {
   overflow: hidden;
   border: 0;
   background: transparent;
-  color: #26221f;
+  color: #146466;
 }
 
 .image-dialog::backdrop {
-  background: rgba(255, 253, 251, 0.34);
+  background: rgba(20, 100, 102, 0.45);
   backdrop-filter: blur(3px);
 }
 
@@ -382,7 +383,7 @@ button {
   max-width: 92vw;
   max-height: 92vh;
   border-radius: 0.35rem;
-  box-shadow: 0 24px 80px rgba(45, 37, 31, 0.2);
+  box-shadow: 0 24px 80px rgba(10, 50, 52, 0.35);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -397,9 +398,9 @@ button {
   padding: clamp(1.25rem, 5vw, 3rem);
   overflow: auto;
   border-radius: 0.35rem;
-  background: #fffdfb;
-  color: #26221f;
-  box-shadow: 0 24px 80px rgba(45, 37, 31, 0.2);
+  background: #e2e2c4;
+  color: #146466;
+  box-shadow: 0 24px 80px rgba(10, 50, 52, 0.35);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transform: rotateY(180deg);
@@ -421,9 +422,23 @@ button {
   width: 50px;
   height: 50px;
   object-fit: contain;
-  filter: brightness(0);
-  user-select: none;
+  filter: url(#signatureColor);
   pointer-events: none;
+}
+
+html,
+body,
+.interface,
+.modal-card,
+.art-card,
+.icon-button {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+img {
+  -webkit-user-drag: none;
 }
 
 .modal-close {
