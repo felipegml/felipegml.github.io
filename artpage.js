@@ -1,6 +1,6 @@
 // true: use the internal data in artworks-data.js (works from file:// with no server).
 // false: fetch the external artworks.json (use for the published site).
-const DEVELOPER_MODE = true;
+const DEVELOPER_MODE = false;
 
 const galleryError = document.getElementById("galleryError");
 
