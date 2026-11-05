@@ -40,5 +40,82 @@
     "description": "description",
     "thumb": "assets/art/Original_011_thumb.png",
     "full": "assets/art/Original_011_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/FanArt_019_CastlevaniaDeath_004_thumb.png",
+    "full": "assets/art/FanArt_019_CastlevaniaDeath_004_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/FanArt_025_Golb_AdventureTime_thumb.png",
+    "full": "assets/art/FanArt_025_Golb_AdventureTime_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/FanArt_033_Eddie_StrangerThings_003_thumb.png",
+    "full": "assets/art/FanArt_033_Eddie_StrangerThings_003_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/FanArt_034_Sandman_Sandman_001_thumb.png",
+    "full": "assets/art/FanArt_034_Sandman_Sandman_001_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/FanArt_038_Eyes_CyberpunkER_01_001_thumb.png",
+    "full": "assets/art/FanArt_038_Eyes_CyberpunkER_01_001_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/FanArt_039_David_Eyes_CyberpunkER_02_001_thumb.png",
+    "full": "assets/art/FanArt_039_David_Eyes_CyberpunkER_02_001_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/FanArt_040_Infected_LastOfUs_001_thumb.png",
+    "full": "assets/art/FanArt_040_Infected_LastOfUs_001_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/Game_002_thumb.png",
+    "full": "assets/art/Game_002_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/001_Planets_00_00_thumb.png",
+    "full": "assets/art/001_Planets_00_00_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/001_Planets_00_01_thumb.png",
+    "full": "assets/art/001_Planets_00_01_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/001_Planets_00_02_thumb.png",
+    "full": "assets/art/001_Planets_00_02_full.png"
   }
 ]
