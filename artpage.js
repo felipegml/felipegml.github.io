@@ -33,7 +33,6 @@ function startGallery(artworks) {
   let dragDistance = 0;
   let suppressClickUntil = 0;
   let hintTimer = 0;
-  let mobileSnapTimer = 0;
   const desktopArtworkScales = artworks.map(() => (0.7 + Math.random() * 0.3).toFixed(3));
   const mobileArtworkScales = artworks.map(() => (0.8 + Math.random() * 0.2).toFixed(3));
 
@@ -121,33 +120,6 @@ function startGallery(artworks) {
     }, 1200);
   }
 
-  function centerNearestArtwork() {
-    if (!window.matchMedia("(max-width: 600px)").matches) {
-      return;
-    }
-
-    const viewportCenter = wallViewport.getBoundingClientRect().width / 2;
-    let nearestCenter = null;
-    let nearestDistance = Infinity;
-
-    wallTrack.querySelectorAll(".art-card").forEach((card) => {
-      const bounds = card.getBoundingClientRect();
-      const center = bounds.left + bounds.width / 2;
-      const distance = Math.abs(center - viewportCenter);
-      if (distance < nearestDistance) {
-        nearestCenter = center;
-        nearestDistance = distance;
-      }
-    });
-
-    if (nearestCenter !== null && nearestDistance > 1) {
-      wallViewport.scrollTo({
-        left: wallViewport.scrollLeft + nearestCenter - viewportCenter,
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
-      });
-    }
-  }
-
   function openArtwork(index, card) {
     activeArtworkIndex = index;
     lastOpenedCard = wallSets[1].querySelector(`[data-artwork-index="${index}"]`);
@@ -191,10 +163,6 @@ function startGallery(artworks) {
   wallViewport.addEventListener("scroll", () => {
     keepWallLooping();
     showHintWhenIdle();
-    if (window.matchMedia("(max-width: 600px)").matches) {
-      window.clearTimeout(mobileSnapTimer);
-      mobileSnapTimer = window.setTimeout(centerNearestArtwork, 180);
-    }
   }, { passive: true });
 
   wallViewport.addEventListener("pointerdown", (event) => {

@@ -342,12 +342,16 @@ button {
   left: 50%;
   transform: translate(-50%, -50%);
   perspective: 1600px;
+  -webkit-perspective: 1600px;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .modal-flipper {
   position: relative;
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   transition: transform 0.6s ease;
 }
 
@@ -363,9 +367,8 @@ button {
   max-height: 92vh;
   border-radius: 0.35rem;
   box-shadow: 0 24px 80px rgba(45, 37, 31, 0.2);
-  opacity: 0.96;
-  object-fit: contain;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .modal-back {
@@ -382,6 +385,7 @@ button {
   color: #26221f;
   box-shadow: 0 24px 80px rgba(45, 37, 31, 0.2);
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   transform: rotateY(180deg);
 }
 
@@ -417,6 +421,15 @@ button {
 }
 
 @media (max-width: 600px) {
+  .wall-viewport {
+    scroll-snap-type: x mandatory;
+  }
+
+  .art-card {
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
+
   .wall-set {
     width: calc(var(--artwork-count) * 100vw);
   }
