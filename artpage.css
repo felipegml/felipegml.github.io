@@ -261,11 +261,17 @@ button {
 
 .gallery-hint {
   position: absolute;
-  right: 1rem;
+  left: 50%;
+  width: max-content;
+  max-width: calc(100% - 2rem);
   bottom: clamp(10rem, 18vh, 12rem);
-  left: 1rem;
   margin: 0;
-  color: var(--ink-muted);
+  padding: 0.45rem 0.8rem;
+  border-radius: 0.5rem;
+  background: rgba(29, 29, 29, 0.2);
+  backdrop-filter: blur(8px);
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.75);
   font-size: clamp(0.68rem, 1.6vw, 0.8rem);
   letter-spacing: 0.015em;
   line-height: 1.5;
@@ -435,17 +441,34 @@ img {
 
 .modal-navigation {
   position: absolute;
-  top: 50%;
+  bottom: clamp(1.5rem, 4vh, 2.5rem);
   right: clamp(1rem, 3vw, 2rem);
   left: clamp(1rem, 3vw, 2rem);
   display: flex;
   justify-content: space-between;
-  transform: translateY(-50%);
   pointer-events: none;
 }
 
 .modal-navigation .icon-button {
   pointer-events: auto;
+}
+
+.flip-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max-content;
+  max-width: calc(100% - 7rem);
+  margin: 0;
+  padding: 0.45rem 0.8rem;
+  border-radius: 0.5rem;
+  background: rgba(29, 29, 29, 0.2);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.78rem;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 @media (max-width: 600px) {
@@ -484,11 +507,11 @@ img {
   }
 
   .wall-controls {
-    top: auto;
+    top: 50%;
     right: 1rem;
-    bottom: 12rem;
+    bottom: auto;
     left: 1rem;
-    transform: none;
+    transform: translateY(-50%);
   }
 
   .wall-controls .icon-button {
@@ -498,8 +521,7 @@ img {
 
   .gallery-hint {
     bottom: calc(18vh + 0.75rem);
-    max-width: 34rem;
-    margin: auto;
+    max-width: min(34rem, calc(100% - 2rem));
   }
 
   .copyright {
@@ -509,7 +531,11 @@ img {
 
   .modal-art {
     max-width: 94vw;
-    max-height: 90vh;
+    max-height: 76vh;
+  }
+
+  .modal-navigation {
+    bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
   }
 }
 
