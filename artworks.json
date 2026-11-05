@@ -1,36 +1,36 @@
 [
   {
     "title": "Blind Prince - 1 year later",
-    "alt": "",
+    "alt": "alt",
     "description": "A second version of this artwork, 1 year after the original.",
     "thumb": "assets/art/Original_032_002_thumb.png",
     "full": "assets/art/Original_032_002_full.png"
   },
   {
-    "title": "",
-    "alt": "",
-    "description": "",
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
     "thumb": "assets/art/Original_027_002_thumb.png",
     "full": "assets/art/Original_027_002_full.png"
   },
   {
-    "title": "",
-    "alt": "",
-    "description": "",
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
     "thumb": "assets/art/Original_023_thumb.png",
     "full": "assets/art/Original_023_full.png"
   },
   {
-    "title": "",
-    "alt": "",
-    "description": "",
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
     "thumb": "assets/art/Original_021_thumb.png",
     "full": "assets/art/Original_021_full.png"
   },
   {
-    "title": "",
-    "alt": "",
-    "description": "",
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
     "thumb": "assets/art/Original_018_thumb.png",
     "full": "assets/art/Original_018_full.png"
   }
