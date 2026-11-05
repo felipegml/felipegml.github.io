@@ -33,5 +33,12 @@
     "description": "description",
     "thumb": "assets/art/Original_018_thumb.png",
     "full": "assets/art/Original_018_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/Original_011_thumb.png",
+    "full": "assets/art/Original_011_full.png"
   }
 ]

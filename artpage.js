@@ -1,6 +1,7 @@
-// true: use the internal data in artworks-data.js (works from file:// with no server).
-// false: fetch the external artworks.json (use for the published site).
-const DEVELOPER_MODE = false;
+// Use internal data on file:// and local loopback hosts; otherwise fetch artworks.json.
+const DEVELOPER_MODE =
+  location.protocol === "file:" ||
+  ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
 
 const galleryError = document.getElementById("galleryError");
 
@@ -19,6 +20,10 @@ function startGallery(artworks) {
   const wallViewport = document.getElementById("wallViewport");
   const wallTrack = document.getElementById("wallTrack");
   const atmosphere = document.getElementById("atmosphere");
+  const depthTrack = document.createElement("div");
+  depthTrack.className = "depth-track";
+  depthTrack.setAttribute("aria-hidden", "true");
+  atmosphere.append(depthTrack);
   const wallSets = [];
   const interfaceLayer = document.querySelector(".interface");
   const imageDialog = document.getElementById("imageDialog");
@@ -28,6 +33,8 @@ function startGallery(artworks) {
   const modalTitle = document.getElementById("modalTitle");
   const modalDescription = document.getElementById("modalDescription");
   let cycleWidth = 0;
+  let depthScroll = 0;
+  let lastWallScroll = 0;
   let activeArtworkIndex = 0;
   let lastOpenedCard = null;
   let isDragging = false;
@@ -42,6 +49,9 @@ function startGallery(artworks) {
   let hintTimer = 0;
   const desktopArtworkScales = artworks.map(() => (0.7 + Math.random() * 0.3).toFixed(3));
   const mobileArtworkScales = artworks.map(() => (0.8 + Math.random() * 0.2).toFixed(3));
+  const depthTops = [18, 82, 25, 76, 43, 62];
+  const depthOffsets = [-42, 48, -54, 38, 56, -34];
+  const depthScales = [0.82, 1, 0.76, 0.92, 0.86, 1.04];
 
   function createArtworkCard(artwork, index, setIndex) {
     const positions = [
@@ -94,12 +104,43 @@ function startGallery(artworks) {
       });
       wallSets.push(set);
       wallTrack.append(set);
+
+      const depthSet = document.createElement("div");
+      depthSet.className = "depth-set";
+      depthSet.style.setProperty("--artwork-count", String(artworks.length));
+      artworks.forEach((artwork, index) => {
+        const depthImage = document.createElement("img");
+        depthImage.className = "depth-art";
+        depthImage.src = artwork.thumb;
+        depthImage.alt = "";
+        depthImage.loading = "eager";
+        depthImage.decoding = "async";
+        depthImage.draggable = false;
+        depthImage.style.setProperty("--depth-top", `${depthTops[index % depthTops.length]}%`);
+        depthImage.style.setProperty("--depth-left", `calc(${index + 0.5} * var(--slot-size) + ${depthOffsets[index % depthOffsets.length]}px)`);
+        depthImage.style.setProperty("--depth-scale", String(depthScales[index % depthScales.length]));
+        depthSet.append(depthImage);
+      });
+      depthTrack.append(depthSet);
     }
   }
 
   function measureWall() {
     cycleWidth = wallSets[1].offsetLeft - wallSets[0].offsetLeft;
     wallViewport.scrollLeft = wallSets[1].offsetLeft;
+    lastWallScroll = wallViewport.scrollLeft;
+    depthScroll = 0;
+    depthTrack.style.transform = "translate3d(0, 0, 0)";
+  }
+
+  function syncDepthWall() {
+    const scrollLeft = wallViewport.scrollLeft;
+    const delta = scrollLeft - lastWallScroll;
+    lastWallScroll = scrollLeft;
+    if (cycleWidth && Math.abs(delta) <= cycleWidth * 0.5) {
+      depthScroll = (depthScroll + delta * 0.72 + cycleWidth) % cycleWidth;
+      depthTrack.style.transform = `translate3d(${-depthScroll}px, 0, 0)`;
+    }
   }
 
   function keepWallLooping() {
@@ -165,6 +206,7 @@ function startGallery(artworks) {
   createWall();
   wallViewport.addEventListener("scroll", () => {
     keepWallLooping();
+    syncDepthWall();
     showHintWhenIdle();
   }, { passive: true });
 
@@ -278,16 +320,6 @@ function startGallery(artworks) {
     if (lastOpenedCard && lastOpenedCard.isConnected) {
       lastOpenedCard.focus();
     }
-  });
-
-  artworks.forEach((artwork, index) => {
-    const image = document.createElement("img");
-    image.src = artwork.thumb;
-    image.alt = "";
-    image.loading = "eager";
-    image.style.setProperty("--drift-x", `${index % 2 === 0 ? 24 : -24}px`);
-    image.style.setProperty("--drift-y", `${index % 2 === 0 ? 20 : -20}px`);
-    atmosphere.append(image);
   });
 
   window.addEventListener("resize", measureWall);
