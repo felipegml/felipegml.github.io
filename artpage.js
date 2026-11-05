@@ -19,6 +19,12 @@ function startGallery(artworks) {
 
   const wallViewport = document.getElementById("wallViewport");
   const wallTrack = document.getElementById("wallTrack");
+  const gridViewport = document.getElementById("gridViewport");
+  const artGrid = document.getElementById("artGrid");
+  const viewToggleButton = document.getElementById("viewToggleButton");
+  const gridViewIcon = viewToggleButton.querySelector(".grid-view-icon");
+  const galleryViewIcon = viewToggleButton.querySelector(".gallery-view-icon");
+  const galleryHint = document.getElementById("galleryHint");
   const atmosphere = document.getElementById("atmosphere");
   const depthTrack = document.createElement("div");
   depthTrack.className = "depth-track";
@@ -53,7 +59,7 @@ function startGallery(artworks) {
   const depthOffsets = [-42, 48, -54, 38, 56, -34];
   const depthScales = [0.82, 1, 0.76, 0.92, 0.86, 1.04];
 
-  function createArtworkCard(artwork, index, setIndex) {
+  function createArtworkCard(artwork, index, setIndex, isGridCard = false) {
     const positions = [
       { top: "34%" },
       { top: "68%" },
@@ -61,7 +67,7 @@ function startGallery(artworks) {
       { top: "66%" }
     ];
     const card = document.createElement("button");
-    card.className = "art-card";
+    card.className = isGridCard ? "art-card grid-card" : "art-card";
     card.type = "button";
     card.style.setProperty("--left", `calc(${index + 0.5} * var(--slot-size))`);
     card.style.setProperty("--mobile-left", `${(index + 0.5) * 100}vw`);
@@ -72,7 +78,7 @@ function startGallery(artworks) {
     card.style.setProperty("--float-delay", `${-index * 0.8}s`);
     card.dataset.artworkIndex = String(index);
     card.setAttribute("aria-label", `View ${artwork.title}`);
-    card.tabIndex = setIndex === 1 ? 0 : -1;
+    card.tabIndex = isGridCard || setIndex === 1 ? 0 : -1;
 
     const image = document.createElement("img");
     image.src = artwork.thumb;
@@ -92,6 +98,10 @@ function startGallery(artworks) {
   }
 
   function createWall() {
+    artworks.forEach((artwork, index) => {
+      artGrid.append(createArtworkCard(artwork, index, 1, true));
+    });
+
     for (let setIndex = 0; setIndex < 3; setIndex += 1) {
       const set = document.createElement("div");
       set.className = "wall-set";
@@ -164,11 +174,39 @@ function startGallery(artworks) {
 
   function openArtwork(index, card) {
     activeArtworkIndex = index;
-    lastOpenedCard = wallSets[1].querySelector(`[data-artwork-index="${index}"]`);
+    lastOpenedCard = card.closest(".grid-viewport")
+      ? card
+      : wallSets[1].querySelector(`[data-artwork-index="${index}"]`);
     if (!lastOpenedCard || card.closest(".wall-set") === wallSets[1]) {
       lastOpenedCard = card;
     }
-    showActiveArtwork().then(() => imageDialog.showModal());
+    showActiveArtwork().then(() => {
+      interfaceLayer.classList.add("is-image-selected");
+      imageDialog.showModal();
+    });
+  }
+
+  function setView(view) {
+    const showGrid = view === "grid";
+    document.body.classList.toggle("is-grid-view", showGrid);
+    gridViewport.hidden = !showGrid;
+    updateGridHintVisibility();
+    gridViewIcon.toggleAttribute("hidden", showGrid);
+    galleryViewIcon.toggleAttribute("hidden", !showGrid);
+    viewToggleButton.setAttribute("aria-label", `Switch to ${showGrid ? "gallery" : "grid"} view`);
+    viewToggleButton.setAttribute("title", `Switch to ${showGrid ? "gallery" : "grid"} view`);
+    viewToggleButton.setAttribute("aria-pressed", String(showGrid));
+    galleryHint.textContent = showGrid
+      ? "Scroll through the grid. Select an illustration to take a closer look."
+      : "Drag, scroll, or use the arrow keys to wander. Select an illustration to take a closer look.";
+    (showGrid ? gridViewport : wallViewport).focus({ preventScroll: true });
+  }
+
+  function updateGridHintVisibility() {
+    document.body.classList.toggle(
+      "has-grid-overflow",
+      gridViewport.scrollWidth > gridViewport.clientWidth + 1
+    );
   }
 
   function setFlipped(flipped, animate = true) {
@@ -209,6 +247,14 @@ function startGallery(artworks) {
     syncDepthWall();
     showHintWhenIdle();
   }, { passive: true });
+
+  gridViewport.addEventListener("wheel", (event) => {
+    const distance = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+    if (distance) {
+      event.preventDefault();
+      gridViewport.scrollLeft += distance;
+    }
+  }, { passive: false });
 
   wallViewport.addEventListener("pointerdown", (event) => {
     if (event.pointerType !== "mouse" || event.button !== 0) {
@@ -295,6 +341,9 @@ function startGallery(artworks) {
 
   document.getElementById("previousButton").addEventListener("click", () => moveAlongWall(-1));
   document.getElementById("nextButton").addEventListener("click", () => moveAlongWall(1));
+  viewToggleButton.addEventListener("click", () => {
+    setView(document.body.classList.contains("is-grid-view") ? "gallery" : "grid");
+  });
   document.getElementById("closeDialog").addEventListener("click", () => imageDialog.close());
   document.getElementById("modalPrevious").addEventListener("click", () => changeArtwork(-1));
   document.getElementById("modalNext").addEventListener("click", () => changeArtwork(1));
@@ -317,13 +366,16 @@ function startGallery(artworks) {
     }
   });
   imageDialog.addEventListener("close", () => {
+    document.querySelector(".interface").classList.remove("is-image-selected");
     if (lastOpenedCard && lastOpenedCard.isConnected) {
       lastOpenedCard.focus();
     }
   });
 
   window.addEventListener("resize", measureWall);
+  window.addEventListener("resize", updateGridHintVisibility);
   measureWall();
+  updateGridHintVisibility();
 }
 
 function validateArtworks(artworks) {

@@ -10,6 +10,7 @@
   --paper: #ffffff;
   --accent: #FC4C13;
   --slot: clamp(210px, 24vw, 420px);
+  --grid-footer-space: clamp(9rem, 18vh, 12rem);
 }
 
 * {
@@ -99,6 +100,66 @@ button {
 
 .wall-viewport::-webkit-scrollbar {
   display: none;
+}
+
+body.is-grid-view .atmosphere,
+body.is-grid-view .wall-viewport,
+body.is-grid-view .wall-controls {
+  display: none;
+}
+
+.grid-viewport {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  overflow: auto;
+  padding: clamp(5rem, 12vh, 7rem) clamp(4rem, 8vw, 7rem) var(--grid-footer-space);
+  overscroll-behavior: contain;
+  scrollbar-color: var(--ink-muted) var(--surface);
+  -webkit-overflow-scrolling: touch;
+}
+
+.art-grid {
+  display: grid;
+  width: max-content;
+  min-width: 100%;
+  height: 100%;
+  grid-auto-columns: clamp(150px, 20vw, 260px);
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.art-card.grid-card {
+  position: relative;
+  top: auto;
+  left: auto;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  transform: none;
+  animation: none;
+}
+
+.art-card.grid-card img {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  object-fit: contain;
+  animation: none;
+}
+
+.art-card.grid-card:hover img,
+.art-card.grid-card:focus-visible img {
+  box-shadow: none;
 }
 
 .wall-viewport:focus-visible {
@@ -249,6 +310,21 @@ button {
   text-decoration: none;
 }
 
+.view-toggle-button {
+  position: absolute;
+  top: clamp(1rem, 3vw, 2rem);
+  right: clamp(1rem, 3vw, 2rem);
+  pointer-events: auto;
+}
+
+.view-toggle-button svg[hidden] {
+  display: none;
+}
+
+.interface.is-image-selected .view-toggle-button {
+  display: none;
+}
+
 .wall-controls {
   position: absolute;
   top: 50%;
@@ -285,6 +361,14 @@ button {
 .interface.is-browsing .gallery-hint {
   opacity: 0;
   visibility: hidden;
+}
+
+body.is-grid-view .gallery-hint {
+  bottom: calc(var(--grid-footer-space) - 2rem);
+}
+
+body.is-grid-view:not(.has-grid-overflow) .gallery-hint {
+  display: none;
 }
 
 .copyright {
@@ -472,6 +556,19 @@ img {
 }
 
 @media (max-width: 600px) {
+  :root {
+    --grid-footer-space: 8.5rem;
+  }
+
+  .grid-viewport {
+    padding: 5rem 3rem var(--grid-footer-space);
+  }
+
+  .art-grid {
+    grid-auto-columns: clamp(130px, 38vw, 180px);
+    gap: 0.75rem;
+  }
+
   .depth-set {
     --slot-size: 100vw;
     width: calc(var(--artwork-count) * 100vw);

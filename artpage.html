@@ -12,6 +12,9 @@
   <main class="wall-viewport" id="wallViewport" role="region" aria-label="Scrollable illustration wall" tabindex="0" aria-describedby="galleryHint">
     <div class="wall-track" id="wallTrack"></div>
   </main>
+  <main class="grid-viewport" id="gridViewport" role="region" aria-label="Illustration grid" tabindex="0" hidden>
+    <div class="art-grid" id="artGrid"></div>
+  </main>
   <p class="gallery-error" id="galleryError" role="alert" hidden></p>
 
   <div class="interface">
@@ -20,6 +23,19 @@
         <path d="M10.5 5.5 4 12l6.5 6.5M4.5 12H20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
       </svg>
     </a>
+    <button class="icon-button view-toggle-button" id="viewToggleButton" type="button" aria-label="Switch to grid view" title="Switch to grid view" aria-pressed="false">
+      <svg class="grid-view-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+        <rect x="4" y="4" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <rect x="14" y="4" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <rect x="4" y="14" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <rect x="14" y="14" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+      </svg>
+      <svg class="gallery-view-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" hidden>
+        <rect x="3.5" y="4.5" width="17" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <circle cx="9" cy="9" r="1.5" fill="currentColor"/>
+        <path d="m5 17 4.5-4 3 2.5 3.5-4 3 5.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+      </svg>
+    </button>
     <div class="wall-controls" aria-label="Move along the gallery wall">
       <button class="icon-button" id="previousButton" type="button" aria-label="Move left">
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
