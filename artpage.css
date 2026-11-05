@@ -336,10 +336,26 @@ button {
   backdrop-filter: blur(3px);
 }
 
-.modal-art {
+.modal-card {
   position: absolute;
   top: 50%;
   left: 50%;
+  transform: translate(-50%, -50%);
+  perspective: 1600px;
+  cursor: pointer;
+}
+
+.modal-flipper {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+}
+
+.modal-card.is-flipped .modal-flipper {
+  transform: rotateY(180deg);
+}
+
+.modal-art {
   display: block;
   width: auto;
   height: auto;
@@ -349,7 +365,33 @@ button {
   box-shadow: 0 24px 80px rgba(45, 37, 31, 0.2);
   opacity: 0.96;
   object-fit: contain;
-  transform: translate(-50%, -50%);
+  backface-visibility: hidden;
+}
+
+.modal-back {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  padding: clamp(1.25rem, 5vw, 3rem);
+  overflow: auto;
+  border-radius: 0.35rem;
+  background: #fffdfb;
+  color: #26221f;
+  box-shadow: 0 24px 80px rgba(45, 37, 31, 0.2);
+  backface-visibility: hidden;
+  transform: rotateY(180deg);
+}
+
+.modal-back h2 {
+  margin: 0;
+}
+
+.modal-back p {
+  margin: 0;
+  line-height: 1.6;
 }
 
 .modal-close {

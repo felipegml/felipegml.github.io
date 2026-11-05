@@ -17,6 +17,9 @@ function startGallery(artworks) {
   const interfaceLayer = document.querySelector(".interface");
   const imageDialog = document.getElementById("imageDialog");
   const modalImage = document.getElementById("modalImage");
+  const modalCard = document.getElementById("modalCard");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalDescription = document.getElementById("modalDescription");
   let cycleWidth = 0;
   let activeArtworkIndex = 0;
   let lastOpenedCard = null;
@@ -151,15 +154,27 @@ function startGallery(artworks) {
     if (!lastOpenedCard || card.closest(".wall-set") === wallSets[1]) {
       lastOpenedCard = card;
     }
-    modalImage.src = artworks[activeArtworkIndex].full;
-    modalImage.alt = artworks[activeArtworkIndex].alt;
+    showActiveArtwork();
     imageDialog.showModal();
+  }
+
+  function setFlipped(flipped) {
+    modalCard.classList.toggle("is-flipped", flipped);
+    modalCard.setAttribute("aria-pressed", String(flipped));
+  }
+
+  function showActiveArtwork() {
+    const artwork = artworks[activeArtworkIndex];
+    setFlipped(false);
+    modalImage.src = artwork.full;
+    modalImage.alt = artwork.alt;
+    modalTitle.textContent = artwork.title;
+    modalDescription.textContent = artwork.description;
   }
 
   function changeArtwork(direction) {
     activeArtworkIndex = (activeArtworkIndex + direction + artworks.length) % artworks.length;
-    modalImage.src = artworks[activeArtworkIndex].full;
-    modalImage.alt = artworks[activeArtworkIndex].alt;
+    showActiveArtwork();
   }
 
   function moveAlongWall(direction) {
@@ -270,6 +285,13 @@ function startGallery(artworks) {
   document.getElementById("closeDialog").addEventListener("click", () => imageDialog.close());
   document.getElementById("modalPrevious").addEventListener("click", () => changeArtwork(-1));
   document.getElementById("modalNext").addEventListener("click", () => changeArtwork(1));
+  modalCard.addEventListener("click", () => setFlipped(!modalCard.classList.contains("is-flipped")));
+  modalCard.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setFlipped(!modalCard.classList.contains("is-flipped"));
+    }
+  });
   imageDialog.addEventListener("click", (event) => {
     if (event.target === imageDialog) {
       imageDialog.close();
@@ -313,8 +335,8 @@ fetch(new URL("artworks.json", window.location.href))
       throw new TypeError("Artwork manifest must be a non-empty array.");
     }
     artworks.forEach((artwork, index) => {
-      if (!artwork || ["title", "alt", "thumb", "full"].some((key) => typeof artwork[key] !== "string" || !artwork[key].trim())) {
-        throw new TypeError(`Artwork at index ${index} must include title, alt, thumb, and full strings.`);
+      if (!artwork || ["title", "alt", "description", "thumb", "full"].some((key) => typeof artwork[key] !== "string" || !artwork[key].trim())) {
+        throw new TypeError(`Artwork at index ${index} must include title, alt, description, thumb, and full strings.`);
       }
     });
     startGallery(artworks);

@@ -40,7 +40,15 @@
   </div>
 
   <dialog class="image-dialog" id="imageDialog" aria-label="Full-size illustration">
-    <img class="modal-art" id="modalImage" alt="">
+    <div class="modal-card" id="modalCard" role="button" tabindex="0" aria-pressed="false" aria-label="Flip illustration to read its description">
+      <div class="modal-flipper">
+        <img class="modal-art" id="modalImage" alt="">
+        <div class="modal-back" id="modalBack">
+          <h2 id="modalTitle"></h2>
+          <p id="modalDescription"></p>
+        </div>
+      </div>
+    </div>
     <button class="icon-button modal-close" id="closeDialog" type="button" aria-label="Close illustration">
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
         <path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/>
