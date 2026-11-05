@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="400" viewBox="0 0 320 400">
+  <defs>
+    <linearGradient id="paper" x2="0" y2="1"><stop stop-color="#f8e9ca"/><stop offset="1" stop-color="#f2d8be"/></linearGradient>
+    <linearGradient id="window" x2="0" y2="1"><stop stop-color="#f6c56f"/><stop offset="1" stop-color="#df845e"/></linearGradient>
+  </defs>
+  <rect width="320" height="400" fill="url(#paper)"/>
+  <circle cx="248" cy="85" r="44" fill="#f3bd65"/>
+  <path d="M37 0h19v240H37zM208 0h12v215h-12z" fill="#fff6e8" opacity=".8"/>
+  <path d="M55 0h152v214H55z" fill="url(#window)"/>
+  <path d="M132 0v214M55 106h152" stroke="#fff1d8" stroke-width="10"/>
+  <path d="M72 271h178l-18 97H90z" fill="#bd674d"/>
+  <path d="M91 270c-4-31 13-65 43-82 24 20 32 48 27 82z" fill="#64866b"/>
+  <path d="M145 269c-5-41 10-85 45-107 22 32 21 68 7 107z" fill="#79966f"/>
+  <path d="M129 264c-31-12-52-38-48-69 33 0 56 18 67 49z" fill="#8fa477"/>
+  <path d="M158 267c14-35 38-54 70-52-1 32-19 55-55 67z" fill="#567d66"/>
+  <path d="M0 370h320v30H0z" fill="#d79c73"/>
+</svg>

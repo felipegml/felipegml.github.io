@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Sunroom",
+    "alt": "Illustration of a leafy plant in a terracotta pot beside a warm yellow window.",
+    "thumb": "assets/art/sunroom-thumb.svg",
+    "full": "assets/art/sunroom-full.svg"
+  },
+  {
+    "title": "Blue Hour",
+    "alt": "Illustration of a golden sun setting behind layered blue and coral hills.",
+    "thumb": "assets/art/blue-hour-thumb.svg",
+    "full": "assets/art/blue-hour-full.svg"
+  },
+  {
+    "title": "Moon Tide",
+    "alt": "Illustration of a pale moon above a deep blue sea with softly curling waves.",
+    "thumb": "assets/art/moon-tide-thumb.svg",
+    "full": "assets/art/moon-tide-full.svg"
+  },
+  {
+    "title": "Wildflower Notes",
+    "alt": "Illustration of colorful wildflowers in a small striped vase.",
+    "thumb": "assets/art/wildflower-notes-thumb.svg",
+    "full": "assets/art/wildflower-notes-full.svg"
+  }
+]

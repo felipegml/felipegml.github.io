@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fffdfb">
+  <title>Felipe Gomes - Illustrations</title>
+  <link rel="stylesheet" href="artpage.css">
+</head>
+<body>
+  <div class="atmosphere" id="atmosphere" aria-hidden="true"></div>
+  <main class="wall-viewport" id="wallViewport" role="region" aria-label="Scrollable illustration wall" tabindex="0" aria-describedby="galleryHint">
+    <div class="wall-track" id="wallTrack"></div>
+  </main>
+  <p class="gallery-error" id="galleryError" role="alert" hidden></p>
+
+  <div class="interface">
+    <a class="icon-button home-link" href="index.html" aria-label="Back to home">
+      <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+        <path d="M14.5 5.5 8 12l6.5 6.5M8.5 12H20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+      </svg>
+    </a>
+    <div class="wall-controls" aria-label="Move along the gallery wall">
+      <button class="icon-button" id="previousButton" type="button" aria-label="Move left">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="m14.5 5.5-6.5 6.5 6.5 6.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+        </svg>
+      </button>
+      <button class="icon-button" id="nextButton" type="button" aria-label="Move right">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="m9.5 5.5 6.5 6.5-6.5 6.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+        </svg>
+      </button>
+    </div>
+    <p class="gallery-hint" id="galleryHint">Drag, scroll, or use the arrow keys to wander. Select an illustration to take a closer look.</p>
+    <footer class="copyright">
+      <p>© 2026 Felipe Gomes - @satsuyafrango. All rights reserved.</p>
+      <p>All artwork is protected by copyright. No reproduction, distribution, commercial use, AI training, or data mining is permitted without prior written consent.</p>
+    </footer>
+  </div>
+
+  <dialog class="image-dialog" id="imageDialog" aria-label="Full-size illustration">
+    <img class="modal-art" id="modalImage" alt="">
+    <button class="icon-button modal-close" id="closeDialog" type="button" aria-label="Close illustration">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/>
+      </svg>
+    </button>
+    <nav class="modal-navigation" aria-label="Browse illustrations">
+      <button class="icon-button" id="modalPrevious" type="button" aria-label="Previous illustration">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="m14.5 5.5-6.5 6.5 6.5 6.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+        </svg>
+      </button>
+      <button class="icon-button" id="modalNext" type="button" aria-label="Next illustration">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="m9.5 5.5 6.5 6.5-6.5 6.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+        </svg>
+      </button>
+    </nav>
+  </dialog>
+
+  <script src="artpage.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,322 @@
+const galleryError = document.getElementById("galleryError");
+
+function showGalleryError(error) {
+  console.error("Unable to load the illustration gallery.", error);
+  galleryError.hidden = false;
+  galleryError.textContent = window.location.protocol === "file:"
+    ? "This local file preview cannot load artworks.json. You do not need Python on GitHub Pages; open the published HTTPS gallery page after the gallery files are published."
+    : `The gallery could not load artworks.json. Check that the file is published beside artpage.html. ${error.message}`;
+}
+
+function startGallery(artworks) {
+
+  const wallViewport = document.getElementById("wallViewport");
+  const wallTrack = document.getElementById("wallTrack");
+  const atmosphere = document.getElementById("atmosphere");
+  const wallSets = [];
+  const interfaceLayer = document.querySelector(".interface");
+  const imageDialog = document.getElementById("imageDialog");
+  const modalImage = document.getElementById("modalImage");
+  let cycleWidth = 0;
+  let activeArtworkIndex = 0;
+  let lastOpenedCard = null;
+  let isDragging = false;
+  let lastPointerX = 0;
+  let lastPointerTime = 0;
+  let dragVelocity = 0;
+  let inertiaFrame = 0;
+  let dragStartX = 0;
+  let dragStartScroll = 0;
+  let dragDistance = 0;
+  let suppressClickUntil = 0;
+  let hintTimer = 0;
+  let mobileSnapTimer = 0;
+  const desktopArtworkScales = artworks.map(() => (0.7 + Math.random() * 0.3).toFixed(3));
+  const mobileArtworkScales = artworks.map(() => (0.8 + Math.random() * 0.2).toFixed(3));
+
+  function createArtworkCard(artwork, index, setIndex) {
+    const positions = [
+      { top: "34%" },
+      { top: "68%" },
+      { top: "36%" },
+      { top: "66%" }
+    ];
+    const positionIndex = index % positions.length;
+    const position = positions[positionIndex];
+    const panelIndex = Math.floor(index / positions.length);
+    const artworksInPanel = Math.min(positions.length, artworks.length - panelIndex * positions.length);
+    const columnPosition = ((positionIndex + 0.5) / artworksInPanel) * 100;
+    const card = document.createElement("button");
+    card.className = "art-card";
+    card.type = "button";
+    card.style.setProperty("--left", `calc(${panelIndex * 100}vw + ${columnPosition}vw)`);
+    card.style.setProperty("--mobile-left", `${(index + 0.5) * 100}vw`);
+    card.style.setProperty("--top", position.top);
+    card.style.setProperty("--scale", desktopArtworkScales[index]);
+    card.style.setProperty("--mobile-scale", mobileArtworkScales[index]);
+    card.style.setProperty("--float-duration", `${5 + index * 0.7}s`);
+    card.style.setProperty("--float-delay", `${-index * 0.8}s`);
+    card.dataset.artworkIndex = String(index);
+    card.setAttribute("aria-label", `View ${artwork.title}`);
+    card.tabIndex = setIndex === 1 ? 0 : -1;
+
+    const image = document.createElement("img");
+    image.src = artwork.thumb;
+    image.alt = "";
+    image.loading = "eager";
+    image.decoding = "async";
+    image.draggable = false;
+    card.append(image);
+    card.addEventListener("click", (event) => {
+      if (performance.now() < suppressClickUntil) {
+        event.preventDefault();
+        return;
+      }
+      openArtwork(index, card);
+    });
+    return card;
+  }
+
+  function createWall() {
+    for (let setIndex = 0; setIndex < 3; setIndex += 1) {
+      const set = document.createElement("div");
+      set.className = "wall-set";
+      set.style.setProperty("--panel-count", String(Math.ceil(artworks.length / 4)));
+      set.style.setProperty("--artwork-count", String(artworks.length));
+      if (setIndex !== 1) {
+        set.setAttribute("aria-hidden", "true");
+      }
+      artworks.forEach((artwork, index) => {
+        set.append(createArtworkCard(artwork, index, setIndex));
+      });
+      wallSets.push(set);
+      wallTrack.append(set);
+    }
+  }
+
+  function measureWall() {
+    cycleWidth = wallSets[1].offsetLeft - wallSets[0].offsetLeft;
+    wallViewport.scrollLeft = wallSets[1].offsetLeft;
+  }
+
+  function keepWallLooping() {
+    if (!cycleWidth) {
+      return;
+    }
+    if (wallViewport.scrollLeft < cycleWidth * 0.5) {
+      wallViewport.scrollLeft += cycleWidth;
+    } else if (wallViewport.scrollLeft > cycleWidth * 1.5) {
+      wallViewport.scrollLeft -= cycleWidth;
+    }
+  }
+
+  function showHintWhenIdle() {
+    interfaceLayer.classList.add("is-browsing");
+    window.clearTimeout(hintTimer);
+    hintTimer = window.setTimeout(() => {
+      interfaceLayer.classList.remove("is-browsing");
+    }, 1200);
+  }
+
+  function centerNearestArtwork() {
+    if (!window.matchMedia("(max-width: 600px)").matches) {
+      return;
+    }
+
+    const viewportCenter = wallViewport.getBoundingClientRect().width / 2;
+    let nearestCenter = null;
+    let nearestDistance = Infinity;
+
+    wallTrack.querySelectorAll(".art-card").forEach((card) => {
+      const bounds = card.getBoundingClientRect();
+      const center = bounds.left + bounds.width / 2;
+      const distance = Math.abs(center - viewportCenter);
+      if (distance < nearestDistance) {
+        nearestCenter = center;
+        nearestDistance = distance;
+      }
+    });
+
+    if (nearestCenter !== null && nearestDistance > 1) {
+      wallViewport.scrollTo({
+        left: wallViewport.scrollLeft + nearestCenter - viewportCenter,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+      });
+    }
+  }
+
+  function openArtwork(index, card) {
+    activeArtworkIndex = index;
+    lastOpenedCard = wallSets[1].querySelector(`[data-artwork-index="${index}"]`);
+    if (!lastOpenedCard || card.closest(".wall-set") === wallSets[1]) {
+      lastOpenedCard = card;
+    }
+    modalImage.src = artworks[activeArtworkIndex].full;
+    modalImage.alt = artworks[activeArtworkIndex].alt;
+    imageDialog.showModal();
+  }
+
+  function changeArtwork(direction) {
+    activeArtworkIndex = (activeArtworkIndex + direction + artworks.length) % artworks.length;
+    modalImage.src = artworks[activeArtworkIndex].full;
+    modalImage.alt = artworks[activeArtworkIndex].alt;
+  }
+
+  function moveAlongWall(direction) {
+    const card = wallSets[1].querySelector(".art-card");
+    const distance = card.getBoundingClientRect().width * 1.5;
+    wallViewport.scrollBy({
+      left: direction * distance,
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+    });
+    showHintWhenIdle();
+  }
+
+  createWall();
+  wallViewport.addEventListener("scroll", () => {
+    keepWallLooping();
+    showHintWhenIdle();
+    if (window.matchMedia("(max-width: 600px)").matches) {
+      window.clearTimeout(mobileSnapTimer);
+      mobileSnapTimer = window.setTimeout(centerNearestArtwork, 180);
+    }
+  }, { passive: true });
+
+  wallViewport.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "mouse" || event.button !== 0) {
+      return;
+    }
+    cancelAnimationFrame(inertiaFrame);
+    isDragging = true;
+    dragStartX = event.clientX;
+    dragStartScroll = wallViewport.scrollLeft;
+    lastPointerX = event.clientX;
+    lastPointerTime = performance.now();
+    dragVelocity = 0;
+    dragDistance = 0;
+    wallViewport.focus({ preventScroll: true });
+    showHintWhenIdle();
+  });
+
+  window.addEventListener("pointermove", (event) => {
+    if (!isDragging) {
+      return;
+    }
+    const now = performance.now();
+    const elapsed = Math.max(1, now - lastPointerTime);
+    const delta = event.clientX - dragStartX;
+    dragDistance = Math.max(dragDistance, Math.abs(delta));
+    if (dragDistance > 4) {
+      wallViewport.classList.add("is-dragging");
+      wallViewport.scrollLeft = dragStartScroll - delta;
+      const instantVelocity = -(event.clientX - lastPointerX) / elapsed;
+      dragVelocity = dragVelocity * 0.68 + instantVelocity * 0.32;
+    }
+    lastPointerX = event.clientX;
+    lastPointerTime = now;
+  });
+
+  function coast() {
+    const started = performance.now();
+    let previousTime = started;
+    function step(now) {
+      const elapsed = Math.min(now - previousTime, 32);
+      previousTime = now;
+      wallViewport.scrollLeft += dragVelocity * elapsed;
+      dragVelocity *= Math.exp(-0.004 * elapsed);
+      if (Math.abs(dragVelocity) > 0.025 && now - started < 1800) {
+        inertiaFrame = requestAnimationFrame(step);
+      } else {
+        inertiaFrame = 0;
+      }
+    }
+    inertiaFrame = requestAnimationFrame(step);
+  }
+
+  function endDrag() {
+    if (!isDragging) {
+      return;
+    }
+    isDragging = false;
+    if (dragDistance > 4) {
+      suppressClickUntil = performance.now() + 250;
+    }
+    wallViewport.classList.remove("is-dragging");
+    if (dragDistance > 4 && Math.abs(dragVelocity) > 0.025) {
+      coast();
+    }
+  }
+
+  window.addEventListener("pointerup", endDrag);
+  window.addEventListener("pointercancel", endDrag);
+  wallViewport.addEventListener("wheel", (event) => {
+    const distance = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+    if (distance) {
+      event.preventDefault();
+      wallViewport.scrollLeft += distance;
+      showHintWhenIdle();
+    }
+  }, { passive: false });
+
+  wallViewport.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+      event.preventDefault();
+      moveAlongWall(event.key === "ArrowRight" ? 1 : -1);
+    }
+  });
+
+  document.getElementById("previousButton").addEventListener("click", () => moveAlongWall(-1));
+  document.getElementById("nextButton").addEventListener("click", () => moveAlongWall(1));
+  document.getElementById("closeDialog").addEventListener("click", () => imageDialog.close());
+  document.getElementById("modalPrevious").addEventListener("click", () => changeArtwork(-1));
+  document.getElementById("modalNext").addEventListener("click", () => changeArtwork(1));
+  imageDialog.addEventListener("click", (event) => {
+    if (event.target === imageDialog) {
+      imageDialog.close();
+    }
+  });
+  imageDialog.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      changeArtwork(event.key === "ArrowRight" ? 1 : -1);
+    }
+  });
+  imageDialog.addEventListener("close", () => {
+    if (lastOpenedCard && lastOpenedCard.isConnected) {
+      lastOpenedCard.focus();
+    }
+  });
+
+  artworks.forEach((artwork, index) => {
+    const image = document.createElement("img");
+    image.src = artwork.thumb;
+    image.alt = "";
+    image.loading = "eager";
+    image.style.setProperty("--drift-x", `${index % 2 === 0 ? 24 : -24}px`);
+    image.style.setProperty("--drift-y", `${index % 2 === 0 ? 20 : -20}px`);
+    atmosphere.append(image);
+  });
+
+  window.addEventListener("resize", measureWall);
+  measureWall();
+}
+
+fetch(new URL("artworks.json", window.location.href))
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error(`Artwork manifest request failed with status ${response.status}.`);
+    }
+    return response.json();
+  })
+  .then((artworks) => {
+    if (!Array.isArray(artworks) || artworks.length === 0) {
+      throw new TypeError("Artwork manifest must be a non-empty array.");
+    }
+    artworks.forEach((artwork, index) => {
+      if (!artwork || ["title", "alt", "thumb", "full"].some((key) => typeof artwork[key] !== "string" || !artwork[key].trim())) {
+        throw new TypeError(`Artwork at index ${index} must include title, alt, thumb, and full strings.`);
+      }
+    });
+    startGallery(artworks);
+  })
+  .catch(showGalleryError);

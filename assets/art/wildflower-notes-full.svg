@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1200" viewBox="0 0 320 400">
+  <defs>
+    <linearGradient id="field" x2="0" y2="1"><stop stop-color="#f7ecd5"/><stop offset="1" stop-color="#dfd5b8"/></linearGradient>
+    <linearGradient id="vase" x2="0" y2="1"><stop stop-color="#ce8461"/><stop offset="1" stop-color="#a95b51"/></linearGradient>
+  </defs>
+  <rect width="320" height="400" fill="#f3e8d7"/>
+  <path d="M28 34h264v332H28z" fill="url(#field)"/>
+  <path d="M50 67h45M230 79h27M55 132h22" stroke="#fff7e5" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+  <circle cx="82" cy="90" r="26" fill="#e38b72"/>
+  <circle cx="82" cy="90" r="10" fill="#f5d686"/>
+  <circle cx="213" cy="122" r="23" fill="#8b91ad"/>
+  <circle cx="213" cy="122" r="8" fill="#f4d58c"/>
+  <circle cx="144" cy="77" r="20" fill="#e9b65e"/>
+  <circle cx="144" cy="77" r="7" fill="#f7e6a9"/>
+  <path d="M82 111v139M144 97v153M213 145v105" stroke="#668369" stroke-width="6"/>
+  <path d="M83 183c-29-24-48-16-50 7 22 12 38 7 50-7M145 164c26-20 45-11 46 12-21 10-36 4-46-12M212 198c-24-18-39-11-40 9 18 9 31 4 40-9" fill="#88a17d"/>
+  <path d="M92 248h136l22 94H69z" fill="url(#vase)"/>
+  <path d="M79 271h151M84 296h161" stroke="#e7bc8f" stroke-width="7"/>
+  <path d="M91 252h137" stroke="#874f49" stroke-width="3" opacity=".5"/>
+  <circle cx="258" cy="199" r="3" fill="#fff5da"/>
+  <circle cx="56" cy="226" r="2.5" fill="#fff5da"/>
+  <path d="M28 34h264v332H28z" fill="none" stroke="#fff8e9" stroke-width="5"/>
+</svg>
