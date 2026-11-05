@@ -188,7 +188,12 @@ body.is-grid-view .wall-controls {
   display: none;
 }
 
-.wall-viewport.is-dragging {
+.grid-viewport {
+  cursor: grab;
+}
+
+.wall-viewport.is-dragging,
+.grid-viewport.is-dragging {
   cursor: grabbing;
   user-select: none;
 }

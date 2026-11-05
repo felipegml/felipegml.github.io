@@ -256,21 +256,27 @@ function startGallery(artworks) {
     }
   }, { passive: false });
 
-  wallViewport.addEventListener("pointerdown", (event) => {
+  let dragViewport = wallViewport;
+
+  function startDrag(event, viewport) {
     if (event.pointerType !== "mouse" || event.button !== 0) {
       return;
     }
     cancelAnimationFrame(inertiaFrame);
+    dragViewport = viewport;
     isDragging = true;
     dragStartX = event.clientX;
-    dragStartScroll = wallViewport.scrollLeft;
+    dragStartScroll = dragViewport.scrollLeft;
     lastPointerX = event.clientX;
     lastPointerTime = performance.now();
     dragVelocity = 0;
     dragDistance = 0;
-    wallViewport.focus({ preventScroll: true });
+    dragViewport.focus({ preventScroll: true });
     showHintWhenIdle();
-  });
+  }
+
+  wallViewport.addEventListener("pointerdown", (event) => startDrag(event, wallViewport));
+  gridViewport.addEventListener("pointerdown", (event) => startDrag(event, gridViewport));
 
   window.addEventListener("pointermove", (event) => {
     if (!isDragging) {
@@ -281,8 +287,8 @@ function startGallery(artworks) {
     const delta = event.clientX - dragStartX;
     dragDistance = Math.max(dragDistance, Math.abs(delta));
     if (dragDistance > 4) {
-      wallViewport.classList.add("is-dragging");
-      wallViewport.scrollLeft = dragStartScroll - delta;
+      dragViewport.classList.add("is-dragging");
+      dragViewport.scrollLeft = dragStartScroll - delta;
       const instantVelocity = -(event.clientX - lastPointerX) / elapsed;
       dragVelocity = dragVelocity * 0.68 + instantVelocity * 0.32;
     }
@@ -296,7 +302,7 @@ function startGallery(artworks) {
     function step(now) {
       const elapsed = Math.min(now - previousTime, 32);
       previousTime = now;
-      wallViewport.scrollLeft += dragVelocity * elapsed;
+      dragViewport.scrollLeft += dragVelocity * elapsed;
       dragVelocity *= Math.exp(-0.004 * elapsed);
       if (Math.abs(dragVelocity) > 0.025 && now - started < 1800) {
         inertiaFrame = requestAnimationFrame(step);
@@ -315,7 +321,7 @@ function startGallery(artworks) {
     if (dragDistance > 4) {
       suppressClickUntil = performance.now() + 250;
     }
-    wallViewport.classList.remove("is-dragging");
+    dragViewport.classList.remove("is-dragging");
     if (dragDistance > 4 && Math.abs(dragVelocity) > 0.025) {
       coast();
     }
