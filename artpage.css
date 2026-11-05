@@ -483,6 +483,7 @@ body.is-grid-view:not(.has-grid-overflow) .gallery-hint {
 
 .modal-back h2 {
   margin: 0;
+  color: #fc4c13;
 }
 
 .modal-back p {
