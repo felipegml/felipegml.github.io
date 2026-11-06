@@ -117,5 +117,47 @@
     "description": "description",
     "thumb": "assets/art/001_Planets_00_02_thumb.png",
     "full": "assets/art/001_Planets_00_02_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/DTIYS_015_thresetgner29k_thumb.png",
+    "full": "assets/art/DTIYS_015_thresetgner29k_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/DTIYS_016_risotoo10k_thumb.png",
+    "full": "assets/art/DTIYS_016_risotoo10k_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/DTIYS_017_Eddi2k_thumb.png",
+    "full": "assets/art/DTIYS_017_Eddi2k_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/DTIYS_019_brianserway_thumb.png",
+    "full": "assets/art/DTIYS_019_brianserway_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/DTIYS_023_msshanhredraw_001_thumb.png",
+    "full": "assets/art/DTIYS_023_msshanhredraw_001_full.png"
+  },
+  {
+    "title": "title",
+    "alt": "alt",
+    "description": "description",
+    "thumb": "assets/art/DTIYS_024_bizu20k_001_thumb.png",
+    "full": "assets/art/DTIYS_024_bizu20k_001_full.png"
   }
 ]
