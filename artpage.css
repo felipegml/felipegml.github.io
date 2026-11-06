@@ -500,8 +500,8 @@ body.is-grid-view:not(.has-grid-overflow) .gallery-hint {
   position: absolute;
   right: 1rem;
   bottom: 1rem;
-  width: 75px;
-  height: 75px;
+  width: 8%;
+  height: auto;
   object-fit: contain;
   filter: url(#signatureColor);
   pointer-events: none;
