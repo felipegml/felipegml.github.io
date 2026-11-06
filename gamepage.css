@@ -1,0 +1,422 @@
+:root {
+  color-scheme: dark;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  color: #fff;
+  background: #252525;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --background: #252525;
+  --glow: #737373;
+  --accent: #eee;
+  --card-width: min(76vw, 940px, max(180px, (100vh - 22rem) * 1.7778));
+  --edge-width: min(200px, max(0px, (100vw - var(--card-width)) / 2 - 8px));
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --card-width: min(76vw, 940px, max(180px, (100dvh - 22rem) * 1.7778));
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  background: radial-gradient(ellipse at 50% 30%, var(--glow), transparent 70%), var(--background);
+  transition: background-color 350ms ease;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+button,
+a {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: normal;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.icon-button {
+  display: grid;
+  width: 2.8rem;
+  height: 2.8rem;
+  flex: none;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: rgba(20, 20, 20, 0.85);
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+.icon-button:hover {
+  border-color: var(--accent);
+  transform: scale(1.06);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 5px;
+}
+
+.carousel-section {
+  padding: 1rem 0;
+}
+
+.carousel-frame {
+  position: relative;
+}
+
+.carousel-frame::before,
+.carousel-frame::after {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  width: var(--edge-width);
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  content: "";
+}
+
+.carousel-frame::before {
+  left: 0;
+  -webkit-mask-image: linear-gradient(to right, #000, transparent);
+  mask-image: linear-gradient(to right, #000, transparent);
+}
+
+.carousel-frame::after {
+  right: 0;
+  -webkit-mask-image: linear-gradient(to left, #000, transparent);
+  mask-image: linear-gradient(to left, #000, transparent);
+}
+
+.carousel-viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--edge-width), #000 calc(100% - var(--edge-width)), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 var(--edge-width), #000 calc(100% - var(--edge-width)), transparent);
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+}
+
+.carousel-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-viewport.is-dragging,
+.carousel-viewport.is-centering {
+  scroll-snap-type: none;
+}
+
+.carousel-viewport.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.carousel-track {
+  display: flex;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  width: max-content;
+  min-width: 100%;
+  padding: 6px calc((100vw - var(--card-width)) / 2);
+}
+
+.game-card {
+  width: var(--card-width);
+  flex: none;
+  padding: 0 0 0.5rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  scroll-snap-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 0.4rem;
+  background: #1d1d1d;
+  box-shadow: 0 24px 58px rgba(0, 0, 0, 0.45);
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.card-title,
+.card-description {
+  display: block;
+  text-align: center;
+}
+
+.card-title {
+  margin-top: 1.25rem;
+  font-size: clamp(1.4rem, 3vw, 2.4rem);
+  font-weight: bold;
+}
+
+.card-description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin-top: 0.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+
+.carousel-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.carousel-hint {
+  margin: 2rem auto 0;
+  padding: 0 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: center;
+  transition: opacity 220ms ease, visibility 220ms ease;
+}
+
+.carousel-hint.is-browsing {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.page-error {
+  width: min(82vw, 1100px);
+  margin: 1rem auto 4rem;
+}
+
+.game-details {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: flex;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+body.has-open-details {
+  overflow: hidden;
+}
+
+.details-panel {
+  width: min(100%, 1200px);
+  margin: auto;
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.6rem;
+  background: radial-gradient(ellipse at 50% 30%, var(--glow), transparent 70%), var(--background);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+}
+
+.details-close {
+  margin-left: auto;
+}
+
+.details-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+  padding: clamp(2rem, 8vh, 6rem) clamp(0rem, 3vw, 3rem);
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--accent);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.details-copy h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.details-description {
+  max-width: 60ch;
+  margin: 1.5rem 0;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+.play-link {
+  display: inline-block;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid var(--accent);
+  border-radius: 0.35rem;
+  background: var(--accent);
+  color: #101010;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.play-link:hover {
+  background: #fff;
+}
+
+.details-gallery h3 {
+  margin: 0 0 1rem;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 1rem;
+}
+
+.game-grid img,
+.image-placeholder {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0.25rem;
+  background: #fff;
+  object-fit: cover;
+}
+
+.image-placeholder {
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  color: #444;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.page-error {
+  color: #fff;
+}
+
+.copyright {
+  padding: 0.5rem 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.copyright p {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  :root {
+    --card-width: min(84vw, max(180px, (100vh - 22rem) * 1.7778));
+  }
+
+  .page-error {
+    width: 88vw;
+  }
+
+  @supports (height: 100dvh) {
+    @media (max-width: 600px) {
+      :root {
+        --card-width: min(84vw, max(180px, (100dvh - 22rem) * 1.7778));
+      }
+    }
+  }
+
+  .details-layout {
+    grid-template-columns: 1fr;
+    padding: 2rem 0;
+  }
+
+  .game-details {
+    padding: 1rem;
+  }
+}
+
+@media (max-height: 500px) {
+  .page-header {
+    padding: 0.5rem 1rem;
+  }
+
+  .carousel-section {
+    padding: 0.25rem 0;
+  }
+
+  .card-title {
+    margin-top: 0.5rem;
+    font-size: 1.25rem;
+  }
+
+  .card-description {
+    margin-top: 0.25rem;
+  }
+
+  .carousel-hint {
+    margin-top: 0.5rem;
+  }
+
+  .copyright {
+    padding: 0.25rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
