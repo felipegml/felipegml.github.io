@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1d1d1d">
+  <title>Felipe Gomes - Illustrations</title>
+  <link rel="stylesheet" href="artpage.css">
+</head>
+<body>
+  <div class="atmosphere" id="atmosphere" aria-hidden="true"></div>
+  <main class="wall-viewport" id="wallViewport" role="region" aria-label="Scrollable illustration wall" tabindex="0" aria-describedby="galleryHint">
+    <div class="wall-track" id="wallTrack"></div>
+  </main>
+  <main class="grid-viewport" id="gridViewport" role="region" aria-label="Illustration grid" tabindex="0" hidden>
+    <div class="art-grid" id="artGrid"></div>
+  </main>
+  <p class="gallery-error" id="galleryError" role="alert" hidden></p>
+
+  <div class="interface">
+    <a class="icon-button home-link" href="index.html" aria-label="Back to home">
+      <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+        <path d="M10.5 5.5 4 12l6.5 6.5M4.5 12H20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+      </svg>
+    </a>
+    <button class="icon-button view-toggle-button" id="viewToggleButton" type="button" aria-label="Switch to grid view" title="Switch to grid view" aria-pressed="false">
+      <svg class="grid-view-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+        <rect x="4" y="4" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <rect x="14" y="4" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <rect x="4" y="14" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <rect x="14" y="14" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+      </svg>
+      <svg class="gallery-view-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" hidden>
+        <rect x="3.5" y="4.5" width="17" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <circle cx="9" cy="9" r="1.5" fill="currentColor"/>
+        <path d="m5 17 4.5-4 3 2.5 3.5-4 3 5.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+      </svg>
+    </button>
+    <div class="wall-controls" aria-label="Move along the gallery wall">
+      <button class="icon-button" id="previousButton" type="button" aria-label="Move left">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="m14.5 5.5-6.5 6.5 6.5 6.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+        </svg>
+      </button>
+      <button class="icon-button" id="nextButton" type="button" aria-label="Move right">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="m9.5 5.5 6.5 6.5-6.5 6.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+        </svg>
+      </button>
+    </div>
+    <p class="gallery-hint" id="galleryHint">Drag, scroll, or use the arrow keys to wander. Select an illustration to take a closer look.</p>
+    <footer class="copyright">
+      <p>© 2026 Felipe Gomes - @satsuyafrango. All rights reserved.</p>
+      <p>All artwork is protected by copyright. No reproduction, distribution, commercial use, AI training, or data mining is permitted without prior written consent.</p>
+    </footer>
+  </div>
+
+  <dialog class="image-dialog" id="imageDialog" aria-label="Full-size illustration">
+    <div class="modal-card" id="modalCard" role="button" tabindex="0" aria-pressed="false" aria-label="Flip illustration to read its description">
+      <div class="modal-flipper" id="modalFlipper">
+        <img class="modal-art" id="modalImage" alt="">
+        <div class="modal-back" id="modalBack">
+          <h2 id="modalTitle"></h2>
+          <p id="modalDescription"></p>
+          <img class="modal-signature" src="assets/art/signature.png" alt="" draggable="false">
+          <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+            <filter id="signatureColor" color-interpolation-filters="sRGB">
+              <feColorMatrix type="matrix" values="0 0 0 0 0.988  0 0 0 0 0.298  0 0 0 0 0.075  0 0 0 1 0"/>
+            </filter>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <button class="icon-button modal-close" id="closeDialog" type="button" aria-label="Close illustration">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/>
+      </svg>
+    </button>
+    <nav class="modal-navigation" aria-label="Browse illustrations">
+      <button class="icon-button" id="modalPrevious" type="button" aria-label="Previous illustration">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="m14.5 5.5-6.5 6.5 6.5 6.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+        </svg>
+      </button>
+      <button class="icon-button" id="modalNext" type="button" aria-label="Next illustration">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="m9.5 5.5 6.5 6.5-6.5 6.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+        </svg>
+      </button>
+      <p class="flip-hint">Click the image to flip</p>
+    </nav>
+  </dialog>
+
+  <script src="artworks-data.js" defer></script>
+  <script src="artpage.js" defer></script>
+</body>
+</html>

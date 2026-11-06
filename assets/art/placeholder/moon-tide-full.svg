@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1200" viewBox="0 0 320 400">
+  <defs>
+    <linearGradient id="night" x2="0" y2="1"><stop stop-color="#293b59"/><stop offset=".55" stop-color="#38566f"/><stop offset="1" stop-color="#718c93"/></linearGradient>
+    <linearGradient id="sea" x2="0" y2="1"><stop stop-color="#477587"/><stop offset="1" stop-color="#294b67"/></linearGradient>
+  </defs>
+  <rect width="320" height="400" fill="#eee7dc"/>
+  <path d="M28 34h264v332H28z" fill="url(#night)"/>
+  <circle cx="205" cy="116" r="48" fill="#f3d9a8"/>
+  <circle cx="222" cy="101" r="47" fill="#293b59"/>
+  <circle cx="91" cy="107" r="2.5" fill="#ffedc5"/>
+  <circle cx="129" cy="76" r="2" fill="#ffedc5"/>
+  <circle cx="252" cy="173" r="2" fill="#ffedc5"/>
+  <path d="M28 255c44-30 76 22 121-4s82-19 143 8v107H28z" fill="#527e8a"/>
+  <path d="M28 291c57-23 77 19 136 0s83-6 128 9v66H28z" fill="url(#sea)"/>
+  <path d="M78 287c41-21 73-3 100-13 29-11 60-7 92 6" fill="none" stroke="#b8d2c8" stroke-width="7" stroke-linecap="round"/>
+  <path d="M107 319c29-12 44-5 60-8M203 333h32M53 342h28" fill="none" stroke="#d7d9c5" stroke-width="4" stroke-linecap="round"/>
+  <path d="M28 34h264v332H28z" fill="none" stroke="#f8f0df" stroke-width="5"/>
+</svg>
