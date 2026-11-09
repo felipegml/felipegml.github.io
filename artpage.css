@@ -236,8 +236,30 @@ body.is-grid-view .wall-controls {
   -webkit-tap-highlight-color: transparent;
 }
 
+.wall-set .art-card::before,
+.wall-set .art-card::after {
+  position: absolute;
+  z-index: 0;
+  top: -100vh;
+  width: 1px;
+  height: calc(100vh + 50%);
+  background: rgba(128, 128, 128, 0.55);
+  content: "";
+  pointer-events: none;
+}
+
+.wall-set .art-card::before {
+  left: 7%;
+}
+
+.wall-set .art-card::after {
+  right: 7%;
+}
+
 .art-card img {
   display: block;
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: auto;
   border: 1px solid rgba(255, 255, 255, 0.7);
