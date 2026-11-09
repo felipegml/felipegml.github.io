@@ -104,6 +104,7 @@ function startGamePage(gameData) {
     detailsDescription.textContent = game.description;
     playLink.href = game.playUrl;
     playLink.textContent = game.playUrlIsPlaceholder ? "Play (placeholder link)" : "Play game";
+    gameGrid.parentElement.dataset.imageCount = String(game.images.length);
     gameGrid.replaceChildren();
     game.images.forEach((image) => {
       if (image.src) {
