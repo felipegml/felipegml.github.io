@@ -3,6 +3,7 @@
   font-family: Georgia, serif;
   background: #1d1719;
   color: #f7eee3;
+  --footer-space: 4.5rem;
 }
 
 * { box-sizing: border-box; }
@@ -19,7 +20,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: 3rem 1rem 1rem;
+  padding: 3rem 1rem var(--footer-space);
   background: radial-gradient(ellipse at center, #493739 0%, #21191c 68%, #151113 100%);
 }
 
@@ -41,11 +42,11 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
 .control:hover:not(:disabled) { background: #684448; }
 .control:disabled { opacity: 0.35; cursor: default; }
 .gallery-error { max-width: 36rem; color: #ffb9aa; text-align: center; }
-.book-area { width: 100%; text-align: center; }
+.book-area { width: 100%; text-align: center; transform: translateY(0.5rem); }
 .book-scene { perspective: 1800px; overflow: clip; padding: 2rem 0; margin: -2rem 0; filter: drop-shadow(0 16px 18px #0008); }
 .book {
   position: relative;
-  width: min(90vw, 1000px, (100dvh - 10rem) * 1.5);
+  width: min(90vw, 1000px, (100dvh - 13.5rem) * 1.5);
   aspect-ratio: 3 / 2;
   margin: auto;
   transform-style: preserve-3d;
@@ -91,7 +92,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
   background: linear-gradient(135deg, #702a3b, #461522);
   color: #f5dfc3;
 }
-.cover-title { font-size: clamp(1.3rem, 3vw, 2.8rem); font-weight: normal; letter-spacing: 0.12em; }
+.cover-title { font-size: clamp(1.3rem, 3vw, 2.8rem); font-weight: normal; letter-spacing: 0.12em; white-space: pre-line; }
 .cover-signature { width: 34%; max-height: 40%; object-fit: contain; filter: url(#coverSignatureColor); }
 .index-heading, .index-list {
   display: flex;
@@ -134,7 +135,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
 .art-button { display: grid; place-items: center; width: 100%; height: 100%; min-height: 0; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
 .art-button img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 8px 20px #0004; }
 .image-error { color: #8d2935; font: 0.9rem Arial, sans-serif; }
-.grid-viewport { position: fixed; inset: 0; overflow: auto; padding: 5rem 4rem 3rem; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; cursor: grab; }
+.grid-viewport { position: fixed; inset: 0; overflow: auto; padding: 5rem 4rem var(--footer-space); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; cursor: grab; }
 .grid-viewport.is-dragging { cursor: grabbing; }
 .art-grid { display: grid; width: max-content; min-width: 100%; height: 100%; grid-auto-columns: clamp(150px, 20vw, 260px); grid-auto-flow: column; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: clamp(0.75rem, 2vw, 1.5rem); }
 .grid-card { min-width: 0; min-height: 0; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
@@ -171,6 +172,24 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
 .book-controls p { margin: 0; font-size: 0.9rem; overflow-wrap: anywhere; }
 .contents-button { grid-column: 5; }
 .hint { margin: 0.6rem 0 0; color: #c5b2ab; font: 0.75rem Arial, sans-serif; }
+.copyright {
+  position: fixed;
+  z-index: 2;
+  bottom: 0.45rem;
+  left: 50%;
+  width: min(1120px, calc(100% - 2rem));
+  max-height: min(16vh, 9rem);
+  padding: 0.35rem 0.65rem;
+  overflow-y: auto;
+  border-radius: 0.5rem;
+  background: rgba(70, 21, 34, 0.5);
+  backdrop-filter: blur(8px);
+  transform: translateX(-50%);
+  color: #fff;
+  font: 0.62rem/1.4 "Trebuchet MS", Arial, sans-serif;
+  text-align: center;
+}
+.copyright p { margin: 0.2rem 0; }
 
 .rotate-message { display: none; }
 .image-dialog {
@@ -199,14 +218,16 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
   .rotate-message span { font-size: 4rem; }
 }
 @media (max-height: 500px) {
+  :root { --footer-space: 4.5rem; }
   .gallery { padding-top: 0.5rem; }
-  .book { width: min(90vw, 1000px, (100dvh - 5rem) * 1.5); }
+  .book { width: min(90vw, 1000px, (100dvh - 9rem) * 1.5); }
   .book-controls { margin-top: 0.3rem; }
   .hint { display: none; }
   .home-link { top: 0.5rem; left: 0.5rem; }
+  .copyright { max-height: 22vh; }
 }
 @media (max-width: 600px) {
-  .grid-viewport { padding: 5rem 3rem 3rem; }
+  .grid-viewport { padding: 5rem 3rem var(--footer-space); }
   .art-grid { grid-auto-columns: clamp(130px, 38vw, 180px); gap: 0.75rem; }
 }
 @media (prefers-reduced-motion: reduce) {

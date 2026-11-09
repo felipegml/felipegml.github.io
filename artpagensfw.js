@@ -85,7 +85,7 @@ function startGallery(themes) {
       if (kind === "front") {
         const title = document.createElement("span");
         title.className = "cover-title";
-        title.textContent = "Art Gallery";
+        title.textContent = "Secret\nGallery";
         page.append(title);
       } else {
         const signature = document.createElement("img");
