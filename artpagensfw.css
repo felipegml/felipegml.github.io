@@ -20,14 +20,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: 3rem 1rem var(--footer-space);
+  padding: 2rem 1rem var(--footer-space);
   background: radial-gradient(ellipse at center, #493739 0%, #21191c 68%, #151113 100%);
 }
 
 .home-link { position: fixed; z-index: 2; top: 1rem; left: 1rem; text-decoration: none; }
 .view-toggle { position: fixed; z-index: 2; top: 1rem; right: 1rem; }
 .control {
-  display: inline-grid;
+  display: grid;
   place-items: center;
   width: 2.8rem;
   height: 2.8rem;
@@ -37,16 +37,19 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
   background: #21191ce0;
   color: #f7eee3;
   font-size: 1.4rem;
+  line-height: 1;
+  text-align: center;
   cursor: pointer;
 }
+.control svg { display: block; }
 .control:hover:not(:disabled) { background: #684448; }
 .control:disabled { opacity: 0.35; cursor: default; }
 .gallery-error { max-width: 36rem; color: #ffb9aa; text-align: center; }
-.book-area { width: 100%; text-align: center; transform: translateY(0.5rem); }
+.book-area { width: 100%; text-align: center; }
 .book-scene { perspective: 1800px; overflow: clip; padding: 2rem 0; margin: -2rem 0; filter: drop-shadow(0 16px 18px #0008); pointer-events: none; }
 .book {
   position: relative;
-  width: min(90vw, 1000px, (100dvh - 13.5rem) * 1.5);
+  width: min(94vw, 1200px, (100dvh - 11rem) * 1.5);
   aspect-ratio: 3 / 2;
   margin: auto;
   transform-style: preserve-3d;
@@ -170,11 +173,12 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
 .turning-front::after { left: 0; background: linear-gradient(90deg, #5d4b3b38, transparent); }
 .turning-back::after { right: 0; background: linear-gradient(90deg, transparent, #5d4b3b38); }
 .turning-back { transform: rotateY(180deg); }
-.book-controls { display: grid; grid-template-columns: repeat(2, 2.8rem) minmax(0, 16rem) repeat(2, 2.8rem); justify-content: center; align-items: center; gap: clamp(0.35rem, 2vw, 1.25rem); margin: 1rem auto 0; width: min(100%, 30rem); }
-.book-controls #previousPage { grid-column: 2; }
+.book-controls { display: flex; justify-content: center; align-items: center; gap: clamp(0.3rem, 1vw, 0.75rem); margin: 0.35rem auto 0; width: min(100%, 30rem); }
+.book-controls #previousPage { position: fixed; z-index: 3; top: calc(50% - 3.35rem); left: clamp(0.75rem, 2vw, 2rem); transform: translateY(-50%); }
+.book-controls #nextPage { position: fixed; z-index: 3; top: calc(50% - 3.35rem); right: clamp(0.75rem, 2vw, 2rem); transform: translateY(-50%); }
+.book-controls .contents-button { position: fixed; z-index: 3; top: calc(50% + 0.45rem); left: clamp(0.75rem, 2vw, 2rem); transform: translateY(-50%); }
 .book-controls p { margin: 0; font-size: 0.9rem; overflow-wrap: anywhere; }
-.contents-button { grid-column: 5; }
-.hint { margin: 0.6rem 0 0; color: #c5b2ab; font: 0.75rem Arial, sans-serif; }
+.hint { position: fixed; z-index: 1; top: 50%; right: 0; left: 0; margin: 0; padding: 0 1rem; color: #c5b2ab; font: 0.75rem Arial, sans-serif; text-align: center; transform: translateY(-50%); pointer-events: none; }
 .copyright {
   position: fixed;
   z-index: 2;
@@ -223,10 +227,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
 @media (max-height: 500px) {
   :root { --footer-space: 4.5rem; }
   .gallery { padding-top: 0.5rem; }
-  .book { width: min(90vw, 1000px, (100dvh - 9rem) * 1.5); }
+  .book { width: min(94vw, 1200px, (100dvh - 8rem) * 1.5); }
   .control { width: 2.5rem; height: 2.5rem; font-size: 1.2rem; }
   .control svg { width: 17px; height: 17px; }
-  .book-controls { grid-template-columns: repeat(2, 2.5rem) minmax(0, 10rem) repeat(2, 2.5rem); gap: clamp(0.25rem, 1vw, 0.6rem); margin-top: 0.3rem; }
+  .book-controls { gap: clamp(0.25rem, 1vw, 0.6rem); margin-top: 0.2rem; }
   .book-controls p { font-size: 0.8rem; }
   .cover { border-width: 4px; }
   .cover-title, .index-heading h2 { font-size: clamp(1rem, 5vh, 1.5rem); }

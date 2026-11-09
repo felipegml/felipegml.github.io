@@ -7,6 +7,8 @@ const bookArea = document.getElementById("bookArea");
 const gridViewport = document.getElementById("gridViewport");
 const viewToggle = document.getElementById("viewToggle");
 const imageDialog = document.getElementById("imageDialog");
+const galleryHint = document.querySelector(".hint");
+const copyright = document.querySelector(".copyright");
 
 document.addEventListener("contextmenu", (event) => event.preventDefault());
 
@@ -18,6 +20,13 @@ function updateOrientation() {
 }
 portrait.addEventListener("change", updateOrientation);
 updateOrientation();
+
+function centerGalleryHint(book) {
+  if (bookArea.hidden) return;
+  const bookBottom = book.getBoundingClientRect().bottom;
+  const copyrightTop = copyright.getBoundingClientRect().top;
+  galleryHint.style.top = `${(bookBottom + copyrightTop) / 2}px`;
+}
 
 function validateThemes(themes) {
   if (!Array.isArray(themes) || themes.length === 0) {
@@ -62,7 +71,6 @@ function startGallery(themes) {
   const previous = document.getElementById("previousPage");
   const next = document.getElementById("nextPage");
   const contentsButton = document.getElementById("contentsButton");
-  const status = document.getElementById("bookStatus");
   const grid = document.getElementById("artGrid");
   const modalImage = document.getElementById("modalImage");
   const modalError = document.getElementById("modalError");
@@ -181,9 +189,6 @@ function startGallery(themes) {
     book.classList.toggle("is-back-cover", back);
     setPage(leftPage, makeLeftPage(position));
     setPage(rightPage, makeRightPage(position));
-    status.textContent = front ? "Front cover" : back ? "Back cover" : position === 1
-      ? "Contents"
-      : artworks[position - 2].title;
     const focusedControl = document.activeElement;
     previous.disabled = front;
     next.disabled = back;
@@ -404,6 +409,11 @@ function startGallery(themes) {
 
   renderBook();
   bookArea.hidden = false;
+  const hintPositionObserver = new ResizeObserver(() => centerGalleryHint(book));
+  hintPositionObserver.observe(book);
+  hintPositionObserver.observe(copyright);
+  window.addEventListener("resize", () => centerGalleryHint(book));
+  centerGalleryHint(book);
   viewToggle.disabled = false;
 }
 
