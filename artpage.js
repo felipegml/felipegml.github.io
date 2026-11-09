@@ -80,6 +80,13 @@ function startGallery(artworks) {
     card.setAttribute("aria-label", `View ${artwork.title}`);
     card.tabIndex = isGridCard || setIndex === 1 ? 0 : -1;
 
+    ["left", "right"].forEach((side) => {
+      const clip = document.createElement("span");
+      clip.className = `art-clip art-clip-${side}`;
+      clip.setAttribute("aria-hidden", "true");
+      card.append(clip);
+    });
+
     const image = document.createElement("img");
     image.src = artwork.thumb;
     image.alt = "";

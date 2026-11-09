@@ -256,6 +256,31 @@ body.is-grid-view .wall-controls {
   right: 7%;
 }
 
+.wall-set .art-clip {
+  position: absolute;
+  z-index: 0;
+  top: -5px;
+  width: 14px;
+  height: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-bottom: 0;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  background: var(--surface);
+  pointer-events: none;
+  animation: art-float var(--float-duration) ease-in-out infinite alternate;
+  animation-delay: var(--float-delay);
+}
+
+.wall-set .art-clip-left {
+  left: 7%;
+  translate: -50% 0;
+}
+
+.wall-set .art-clip-right {
+  right: 7%;
+  translate: 50% 0;
+}
+
 .art-card img {
   display: block;
   position: relative;
@@ -627,7 +652,8 @@ img {
     transform: translate(-50%, -50%) scale(var(--mobile-scale));
   }
 
-  .art-card img {
+  .art-card img,
+  .wall-set .art-clip {
     animation: none;
   }
 
