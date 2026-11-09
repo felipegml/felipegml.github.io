@@ -4,7 +4,7 @@
   const bg = document.createElement('canvas');
   const bctx = bg.getContext('2d');
 
-  const LINE_COLOR = '#252525';
+  const LINE_COLOR = '#DADADA';
   const LINE_ALPHA = 0.08;
   const NODE_ALPHA = 0.18;
   const PULSE_ALPHA = 0.5;
