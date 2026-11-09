@@ -43,7 +43,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
 .control:disabled { opacity: 0.35; cursor: default; }
 .gallery-error { max-width: 36rem; color: #ffb9aa; text-align: center; }
 .book-area { width: 100%; text-align: center; transform: translateY(0.5rem); }
-.book-scene { perspective: 1800px; overflow: clip; padding: 2rem 0; margin: -2rem 0; filter: drop-shadow(0 16px 18px #0008); }
+.book-scene { perspective: 1800px; overflow: clip; padding: 2rem 0; margin: -2rem 0; filter: drop-shadow(0 16px 18px #0008); pointer-events: none; }
 .book {
   position: relative;
   width: min(90vw, 1000px, (100dvh - 13.5rem) * 1.5);
@@ -52,6 +52,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
   transform-style: preserve-3d;
   transition: transform 650ms ease;
   touch-action: pan-y;
+  pointer-events: auto;
 }
 .book.is-front-cover { transform: translateX(-25%); }
 .book.is-back-cover { transform: translateX(25%); }
@@ -103,7 +104,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
 }
 .index-heading h2 { margin: 0; font-size: clamp(1.3rem, 3vw, 2.8rem); font-weight: normal; }
 .index-heading p { color: #806b60; font-size: clamp(0.75rem, 1.3vw, 1rem); line-height: 1.5; }
-.index-list { gap: clamp(0.3rem, 1vw, 0.8rem); overflow: auto; }
+.index-list { gap: clamp(0.3rem, 1vw, 0.8rem); overflow: auto; touch-action: pan-y; }
 .theme-button {
   display: flex;
   justify-content: space-between;
@@ -127,10 +128,12 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
   gap: 1rem;
   padding: clamp(1rem, 6%, 3rem);
   overflow: auto;
+  touch-action: pan-y;
   text-align: left;
 }
 .description-page h2 { margin: 0; font-size: clamp(1rem, 2.4vw, 2rem); }
 .description-page p { margin: 0; white-space: pre-wrap; line-height: 1.55; font-size: clamp(0.75rem, 1.4vw, 1.05rem); }
+.index-list, .description-page { justify-content: safe center; }
 .image-page { display: grid; place-items: center; padding: 8%; }
 .art-button { display: grid; place-items: center; width: 100%; height: 100%; min-height: 0; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
 .art-button img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 8px 20px #0004; }
@@ -221,13 +224,31 @@ button:focus-visible, a:focus-visible { outline: 3px solid #e6b47a; outline-offs
   :root { --footer-space: 4.5rem; }
   .gallery { padding-top: 0.5rem; }
   .book { width: min(90vw, 1000px, (100dvh - 9rem) * 1.5); }
-  .book-controls { margin-top: 0.3rem; }
+  .control { width: 2.5rem; height: 2.5rem; font-size: 1.2rem; }
+  .control svg { width: 17px; height: 17px; }
+  .book-controls { grid-template-columns: repeat(2, 2.5rem) minmax(0, 10rem) repeat(2, 2.5rem); gap: clamp(0.25rem, 1vw, 0.6rem); margin-top: 0.3rem; }
+  .book-controls p { font-size: 0.8rem; }
+  .cover { border-width: 4px; }
+  .cover-title, .index-heading h2 { font-size: clamp(1rem, 5vh, 1.5rem); }
+  .index-heading, .index-list { padding: clamp(0.5rem, 3vh, 1rem); }
+  .index-heading p { font-size: clamp(0.65rem, 3vh, 0.8rem); }
+  .index-list { gap: clamp(0.1rem, 0.7vh, 0.25rem); }
+  .theme-button { padding: clamp(0.25rem, 1.2vh, 0.45rem) 0; font-size: clamp(0.75rem, 3.5vh, 0.9rem); }
+  .description-page { gap: 0.5rem; padding: clamp(0.5rem, 3vh, 1rem); }
+  .description-page h2 { font-size: clamp(0.85rem, 4vh, 1.1rem); }
+  .description-page p { font-size: clamp(0.7rem, 3vh, 0.85rem); line-height: 1.35; }
+  .grid-viewport { padding: 3.5rem 3rem var(--footer-space); }
+  .art-grid { grid-auto-columns: clamp(110px, 22vw, 180px); gap: 0.6rem; }
   .hint { display: none; }
   .home-link { top: 0.5rem; left: 0.5rem; }
+  .view-toggle { top: 0.5rem; right: 0.5rem; }
   .copyright { max-height: 22vh; }
 }
 @media (max-width: 600px) {
-  .grid-viewport { padding: 5rem 3rem var(--footer-space); }
+  .grid-viewport { padding-right: 3rem; padding-left: 3rem; }
+}
+@media (max-width: 600px) and (min-height: 501px) {
+  .grid-viewport { padding-top: 5rem; }
   .art-grid { grid-auto-columns: clamp(130px, 38vw, 180px); gap: 0.75rem; }
 }
 @media (prefers-reduced-motion: reduce) {
