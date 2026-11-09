@@ -7,6 +7,8 @@ A lightweight portfolio site hosted on GitHub Pages. It is built from static fil
 - `artpage.css` and `artpage.js` contain the gallery styles and behavior.
 - `artworks.json` lists the gallery artwork and its paired thumbnail/full-size image paths.
 - `assets/art/` contains the gallery image files.
+- `signature-data.js` embeds the signature shared by the illustration viewer and the book gallery; it avoids a separate image request, but the embedded image can still be extracted.
+- `artpagensfw.html` is a directly accessible book-style art gallery, with its own `artpagensfw.css`, `artpagensfw.js`, `artworks-nsfw.json` manifest, and `artworks-nsfw-data.js` local test data.
 - `gamepage.html` is a directly accessible game portfolio with a finite carousel and an overlay game details panel.
 - `gamepage.css`, `gamepage.js`, and `game-data.js` define the game page's styles, behavior, and content. Its banners are in `assets/game/`.
 
@@ -22,6 +24,29 @@ To add an illustration, place its thumbnail and full-size JPG or PNG in `assets/
 ```
 
 Use the matching `.png` paths for PNG files. The current SVGs are placeholders; the browser can display JPG and PNG files without a build step. Keep paths relative to the site root so they work on GitHub Pages. Since the gallery loads `artworks.json` with `fetch`, preview the site over HTTP rather than opening `artpage.html` directly with `file://`.
+
+The book gallery is available directly at `artpagensfw.html` and is not linked from the home page. Edit `artworks-nsfw.json` to replace its non-explicit placeholders with the desired artwork. Its top-level array contains themes in book order, each with a non-empty `title` and `artworks` array. Every artwork needs non-empty `title`, `alt`, `description`, `thumb`, and `full` strings; paths must be relative to the site root. The contents page links to the first artwork in each theme. Artwork order within each theme determines the order in the book, grid, and viewer.
+
+The published page fetches this separate manifest. Local loopback and `file://` previews instead use `artworks-nsfw-data.js`; update that file too when testing changes locally. Keep both data files in sync. For example:
+
+```json
+[
+  {
+    "title": "Political",
+    "artworks": [
+      {
+        "title": "Artwork title",
+        "alt": "A short description of the illustration.",
+        "description": "A description for the book.",
+        "thumb": "assets/art/artwork-thumb.jpg",
+        "full": "assets/art/artwork-full.jpg"
+      }
+    ]
+  }
+]
+```
+
+Drag or swipe the book, or use the arrows or keyboard arrow keys to turn between the front cover, contents, artwork spreads, and back cover. Use the contents button beside the arrows to return to the theme index; select a theme to jump to its first artwork. Select an image to open its full-size viewer; use its arrows to browse, and close with Escape, the close button, or the backdrop. The top-right toggle switches between the book and a two-row grid, which supports scrolling, dragging, and touch. Text selection and the context menu are disabled on this page, but these do not prevent copying or downloading content. On narrow portrait screens the gallery asks for landscape orientation. This prompt does not provide age verification or restrict access to the page or image files.
 
 To update the game page, edit the entries in `game-data.js`. Each entry supplies the title, `banner` path, `bannerAlt`, `shortDescription`, and full `description`. Carousel banners use a 16:9 frame and are fitted without cropping; `bannerPosition` controls the banner's CSS `object-position` (for example, `"center center"` or `"30% center"`). `palette` supplies the background, glow, and accent colors. Keep text readable against the chosen colors.
 

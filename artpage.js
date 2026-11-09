@@ -4,6 +4,7 @@ const DEVELOPER_MODE =
   ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
 
 const galleryError = document.getElementById("galleryError");
+document.getElementById("modalSignature").src = window.SIGNATURE_DATA_URL;
 
 document.addEventListener("contextmenu", (event) => event.preventDefault());
 
