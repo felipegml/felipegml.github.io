@@ -9,6 +9,9 @@
   const gamesTitle = document.getElementById('games-title');
   const projectView = document.getElementById('project-view');
   const projectTitle = document.getElementById('project-title');
+  const homeUrl = new URL(window.location.href);
+  homeUrl.hash = '';
+  document.querySelectorAll('a[data-home]').forEach((link) => { link.href = homeUrl.href; });
   const sections = {
     games: 'Games',
     art: 'Art',

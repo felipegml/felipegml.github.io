@@ -2,7 +2,7 @@
 
 A lightweight portfolio site hosted on GitHub Pages. It is built from static files and does not require a build step.
 
-- `index.html` is the landing page.
+- `index.html` is the interactive portfolio landing page, copied from `main_placeholder.html`.
 - `artpage.html` is a full-screen, horizontally scrolling illustration wall with an edge-to-edge image viewer.
 - `artpage.css` and `artpage.js` contain the gallery styles and behavior.
 - `artworks.json` lists the gallery artwork and its paired thumbnail/full-size image paths.
@@ -12,13 +12,13 @@ A lightweight portfolio site hosted on GitHub Pages. It is built from static fil
 - `gamepage.html` is a directly accessible game portfolio with a finite carousel and an overlay game details panel.
 - `gamepage.css`, `gamepage.js`, and `game-data.js` define the game page's styles, behavior, and content. Its banners are in `assets/game/`.
 - `main_music.html` is a directly accessible audio-reactive network; `main_music.css` and `main_music.js` provide its styling and behavior.
-- `main_placeholder.html` is a separate interactive portfolio example over a network background; it does not replace the landing page. Games displays the shared `game-data.js` carousel and details using `gamepage.js`, and its current game's glow color changes the network lights. Art links to `artpage.html`; AR and VR have project views, and Prototype opens a placeholder section. In-page section changes keep the background running and support browser back/forward and section hash links. Edit the introduction, skills, and links in `main_placeholder.html` and section labels in `portfolio_navigation.js` to update the content. A non-intercepted Games link opens the standalone `gamepage.html`; project links open `portfolio_placeholder.html`.
+- `index.html` and `main_placeholder.html` contain the same interactive portfolio over a network background. Keep both copies in sync when editing their introduction, skills, or links. Games displays the shared `game-data.js` carousel and details using `gamepage.js`, and its current game's glow color changes the network lights. Art links to `artpage.html`; AR and VR have project views, and Prototype opens a placeholder section. In-page section changes keep the background running and support browser back/forward and section hash links. Edit section labels in `portfolio_navigation.js` to update the content. A non-intercepted Games link opens the standalone `gamepage.html`; project links open `portfolio_placeholder.html`.
 
-AR and VR descriptions and YouTube links are configured in `portfolio_projects.js`. Set each `videoUrl` to a YouTube watch, short, or embed link to display its thumbnail and playback controls. The player uses YouTube's privacy-enhanced embed and is unloaded when leaving a project section. Preview `main_placeholder.html` over HTTP (for example, run `python -m http.server 8000` in the site directory and open `http://localhost:8000/main_placeholder.html`); YouTube requires an HTTP referrer for embedded playback. When opened directly as a local file, the thumbnail links to the video on YouTube instead.
+AR and VR descriptions and YouTube links are configured in `portfolio_projects.js`. Set each `videoUrl` to a YouTube watch, short, or embed link to display its thumbnail and playback controls. The player uses YouTube's privacy-enhanced embed and is unloaded when leaving a project section. Preview the portfolio over HTTP (for example, run `python -m http.server 8000` in the site directory and open `http://localhost:8000/`); YouTube requires an HTTP referrer for embedded playback. When opened directly as a local file, the thumbnail links to the video on YouTube instead.
 
 Text selection is disabled in the interactive portfolio example, including its games section. This is a presentation choice, not protection against copying.
 
-The social profile list in `main_placeholder.html` links to GitHub and itch.io. LinkedIn, ArtStation, and Instagram are non-interactive until their profile URLs are supplied; replace their placeholder spans with links when available.
+The social profile list in both portfolio HTML files links to GitHub and itch.io. LinkedIn, ArtStation, and Instagram currently use non-interactive spans; replace those with links in both files to enable them.
 
 Open `main_music.html` over HTTPS or localhost in a browser that supports screen sharing with audio. Select **Share audio**, choose a tab or screen, and enable audio sharing in the browser's picker. The available tab and system-audio options depend on the browser and operating system; some sources may not offer audio. Audio is analyzed locally and is not played back by the page. Use **Stop sharing** or the browser's sharing controls to end capture. If reduced motion is enabled, the network remains still.
 
