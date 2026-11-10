@@ -11,6 +11,9 @@ A lightweight portfolio site hosted on GitHub Pages. It is built from static fil
 - `artpagensfw.html` is a directly accessible book-style art gallery, with its own `artpagensfw.css`, `artpagensfw.js`, `artworks-nsfw.json` manifest, and `artworks-nsfw-data.js` local test data.
 - `gamepage.html` is a directly accessible game portfolio with a finite carousel and an overlay game details panel.
 - `gamepage.css`, `gamepage.js`, and `game-data.js` define the game page's styles, behavior, and content. Its banners are in `assets/game/`.
+- `main_music.html` is a directly accessible audio-reactive network; `main_music.css` and `main_music.js` provide its styling and behavior.
+
+Open `main_music.html` over HTTPS or localhost in a browser that supports screen sharing with audio. Select **Share audio**, choose a tab or screen, and enable audio sharing in the browser's picker. The available tab and system-audio options depend on the browser and operating system; some sources may not offer audio. Audio is analyzed locally and is not played back by the page. Use **Stop sharing** or the browser's sharing controls to end capture. If reduced motion is enabled, the network remains still.
 
 To add an illustration, place its thumbnail and full-size JPG or PNG in `assets/art/`, then add an entry to `artworks.json`:
 
