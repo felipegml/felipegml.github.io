@@ -23,6 +23,13 @@
         <path d="M10.5 5.5 4 12l6.5 6.5M4.5 12H20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
       </svg>
     </a>
+    <button class="icon-button nsfw-button" id="nsfwButton" type="button" aria-label="Open NSFW art" title="NSFW art (18+)" aria-haspopup="dialog">
+      <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+        <rect x="5" y="10.5" width="14" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/>
+        <circle cx="12" cy="15" r="1.3" fill="currentColor"/>
+      </svg>
+    </button>
     <button class="icon-button view-toggle-button" id="viewToggleButton" type="button" aria-label="Switch to grid view" title="Switch to grid view" aria-pressed="false">
       <svg class="grid-view-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
         <rect x="4" y="4" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
@@ -54,6 +61,16 @@
       <p>All artwork is protected by copyright. No reproduction, distribution, commercial use, AI training, or data mining is permitted without prior written consent.</p>
     </footer>
   </div>
+
+  <dialog class="nsfw-dialog" id="nsfwDialog" aria-labelledby="nsfwTitle">
+    <h2 id="nsfwTitle">NSFW art ahead</h2>
+    <p>This link leads to NSFW artwork, which may include political themes, erotic content, and fetish content.</p>
+    <p><strong>Are you 18 or older?</strong></p>
+    <div class="nsfw-actions">
+      <button type="button" class="nsfw-choice nsfw-confirm" id="nsfwYes">Yes, I'm 18+</button>
+      <button type="button" class="nsfw-choice" id="nsfwNo" autofocus>No, go back</button>
+    </div>
+  </dialog>
 
   <dialog class="image-dialog" id="imageDialog" aria-label="Full-size illustration">
     <div class="modal-card" id="modalCard" role="button" tabindex="0" aria-pressed="false" aria-label="Flip illustration to read its description">

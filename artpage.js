@@ -358,6 +358,15 @@ function startGallery(artworks) {
   viewToggleButton.addEventListener("click", () => {
     setView(document.body.classList.contains("is-grid-view") ? "gallery" : "grid");
   });
+  const nsfwDialog = document.getElementById("nsfwDialog");
+  document.getElementById("nsfwButton").addEventListener("click", () => nsfwDialog.showModal());
+  document.getElementById("nsfwNo").addEventListener("click", () => nsfwDialog.close());
+  document.getElementById("nsfwYes").addEventListener("click", () => {
+    window.location.href = "artpagensfw.html";
+  });
+  nsfwDialog.addEventListener("click", (event) => {
+    if (event.target === nsfwDialog) nsfwDialog.close();
+  });
   document.getElementById("closeDialog").addEventListener("click", () => imageDialog.close());
   document.getElementById("modalPrevious").addEventListener("click", () => changeArtwork(-1));
   document.getElementById("modalNext").addEventListener("click", () => changeArtwork(1));

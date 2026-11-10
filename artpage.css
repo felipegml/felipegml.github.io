@@ -369,6 +369,62 @@ body.is-grid-view .wall-controls {
   pointer-events: auto;
 }
 
+.nsfw-button {
+  position: absolute;
+  top: clamp(1rem, 3vw, 2rem);
+  right: calc(clamp(1rem, 3vw, 2rem) + 3.6rem);
+}
+
+.interface.is-image-selected .nsfw-button {
+  display: none;
+}
+
+.nsfw-dialog {
+  max-width: min(26rem, calc(100vw - 2rem));
+  padding: 1.6rem;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--paper);
+}
+
+.nsfw-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.nsfw-dialog h2 {
+  margin: 0 0 0.8rem;
+}
+
+.nsfw-dialog p {
+  margin: 0 0 0.8rem;
+  line-height: 1.5;
+}
+
+.nsfw-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.nsfw-choice {
+  padding: 0.6rem 1.1rem;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--paper);
+  font: inherit;
+  cursor: pointer;
+}
+
+.nsfw-choice:hover,
+.nsfw-choice:focus-visible {
+  background: var(--accent);
+  color: var(--surface);
+  outline: none;
+}
+
 .view-toggle-button svg[hidden] {
   display: none;
 }
