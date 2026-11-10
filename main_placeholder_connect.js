@@ -9,7 +9,6 @@
   const CYAN = '0,229,255';
   const PALE = '225,250,255';
   const MAGENTA = '255,45,149';
-  const MAX_CONNECTIONS_PER_NODE = 3;
 
   let w = 0, h = 0, dpr = 1, rafId = 0, last = 0, time = 0;
   let nodes = [];
@@ -44,6 +43,61 @@
       raw: 0, act: 0, flash: 0, tint: Math.random() < 0.08, cell: 0,
       depth: hub ? 1.2 : 0.3 + Math.random() * 0.8
     };
+  }
+
+  function triangulate(points) {
+    if (points.length < 3) return [];
+    const coords = points.map(({ x, y }) => ({ x, y }));
+    const span = Math.max(w, h);
+    const centerX = w / 2, centerY = h / 2;
+    const firstSuper = points.length;
+    coords.push(
+      { x: centerX - span * 20, y: centerY - span * 10 },
+      { x: centerX, y: centerY + span * 20 },
+      { x: centerX + span * 20, y: centerY - span * 10 }
+    );
+
+    let triangles = [makeTriangle(firstSuper, firstSuper + 1, firstSuper + 2, coords)];
+    for (let pointIndex = 0; pointIndex < points.length; pointIndex++) {
+      const boundary = new Map();
+      const remaining = [];
+      for (const triangle of triangles) {
+        if (containsInCircumcircle(triangle, coords[pointIndex], coords)) {
+          for (let edge = 0; edge < 3; edge++) {
+            const a = triangle[edge], b = triangle[(edge + 1) % 3];
+            const key = a < b ? a + ':' + b : b + ':' + a;
+            const entry = boundary.get(key);
+            if (entry) entry.count++;
+            else boundary.set(key, { a, b, count: 1 });
+          }
+        } else {
+          remaining.push(triangle);
+        }
+      }
+      for (const edge of boundary.values()) {
+        if (edge.count === 1) remaining.push(makeTriangle(edge.a, edge.b, pointIndex, coords));
+      }
+      triangles = remaining;
+    }
+
+    return triangles.filter(([a, b, c]) => a < firstSuper && b < firstSuper && c < firstSuper);
+  }
+
+  function makeTriangle(a, b, c, points) {
+    const pa = points[a], pb = points[b], pc = points[c];
+    const area = (pb.x - pa.x) * (pc.y - pa.y) - (pb.y - pa.y) * (pc.x - pa.x);
+    return area >= 0 ? [a, b, c] : [a, c, b];
+  }
+
+  function containsInCircumcircle(triangle, point, points) {
+    const a = points[triangle[0]], b = points[triangle[1]], c = points[triangle[2]];
+    const ax = a.x - point.x, ay = a.y - point.y;
+    const bx = b.x - point.x, by = b.y - point.y;
+    const cx = c.x - point.x, cy = c.y - point.y;
+    const determinant = (ax * ax + ay * ay) * (bx * cy - cx * by)
+      - (bx * bx + by * by) * (ax * cy - cx * ay)
+      + (cx * cx + cy * cy) * (ax * by - bx * ay);
+    return determinant > 0;
   }
 
   function build() {
@@ -163,75 +217,40 @@
       p.oy += (toy - p.oy) * k;
     }
 
-    // neighbour search with a uniform grid
-    const maxThr = base * 1.6 * 1.6;
-    const cs = maxThr;
-    const cols = Math.ceil((w + 120) / cs) + 1;
-    const rows = Math.ceil((h + 120) / cs) + 1;
-    const grid = new Array(cols * rows);
-    for (let i = 0; i < n; i++) {
-      const p = nodes[i];
-      const cx = Math.max(0, Math.min(cols - 1, Math.floor((p.x + 60) / cs)));
-      const cy = Math.max(0, Math.min(rows - 1, Math.floor((p.y + 60) / cs)));
-      p.cell = cx + cy * cols;
-      (grid[p.cell] || (grid[p.cell] = [])).push(i);
-    }
-
     for (const e of edges.values()) e.target = 0;
-    const pairs = [];
+    for (const triangle of triangulate(nodes)) {
+      const pairs = [
+        [triangle[0], triangle[1]],
+        [triangle[1], triangle[2]],
+        [triangle[2], triangle[0]]
+      ];
+      const links = pairs.map(([a, b]) => {
+        const first = nodes[a], second = nodes[b];
+        const d = Math.hypot(first.x - second.x, first.y - second.y);
+        const hubF = (first.hub || second.hub) ? 1.6 : 1;
+        const mouseF = Math.min(1.6, 1 + 1.2 * Math.min(first.raw, second.raw));
+        const thr = base * hubF * mouseF;
+        return { a, b, d, thr, key: Math.min(a, b) * 4096 + Math.max(a, b) };
+      });
+      if (links.some((link) => link.d >= link.thr)) continue;
 
-    for (let i = 0; i < n; i++) {
-      const a = nodes[i];
-      const cx = a.cell % cols, cy = (a.cell / cols) | 0;
-      for (let oy = -1; oy <= 1; oy++) {
-        const gy = cy + oy;
-        if (gy < 0 || gy >= rows) continue;
-        for (let ox = -1; ox <= 1; ox++) {
-          const gx = cx + ox;
-          if (gx < 0 || gx >= cols) continue;
-          const cell = grid[gx + gy * cols];
-          if (!cell) continue;
-          for (let k = 0; k < cell.length; k++) {
-            const j = cell[k];
-            if (j <= i) continue;
-            const b = nodes[j];
-            const dx = a.x - b.x, dy = a.y - b.y;
-            const d2 = dx * dx + dy * dy;
-            if (d2 > maxThr * maxThr) continue;
-            const d = Math.sqrt(d2);
-            const hubF = (a.hub || b.hub) ? 1.6 : 1;
-            const mouseF = Math.min(1.6, 1 + 1.2 * Math.min(a.raw, b.raw));
-            const thr = base * hubF * mouseF;
-            const key = i * 4096 + j;
-            const existing = edges.has(key);
-            if (d >= thr * (existing ? 1.12 : 1)) continue;
-            pairs.push({ a: i, b: j, d, thr, key });
-          }
+      for (const link of links) {
+        let e = edges.get(link.key);
+        if (e) {
+          e.target = 1; e.d = link.d; e.thr = link.thr;
+        } else {
+          e = { a: Math.min(link.a, link.b), b: Math.max(link.a, link.b), alpha: instant ? 1 : 0, target: 1, d: link.d, thr: link.thr };
+          edges.set(link.key, e);
         }
-      }
-    }
-
-    pairs.sort((a, b) => a.d - b.d);
-    const degree = new Uint8Array(n);
-    for (const pair of pairs) {
-      if (degree[pair.a] >= MAX_CONNECTIONS_PER_NODE || degree[pair.b] >= MAX_CONNECTIONS_PER_NODE) continue;
-      degree[pair.a]++;
-      degree[pair.b]++;
-      let e = edges.get(pair.key);
-      if (e) {
-        e.target = 1; e.d = pair.d; e.thr = pair.thr;
-      } else {
-        e = { a: pair.a, b: pair.b, alpha: instant ? 1 : 0, target: 1, d: pair.d, thr: pair.thr };
-        edges.set(pair.key, e);
       }
     }
 
     for (let i = 0; i < n; i++) adj[i].length = 0;
     const fade = Math.min(1, 0.05 * dt);
     for (const [key, e] of edges) {
+      if (e.target === 0) { edges.delete(key); continue; }
       e.alpha += (e.target - e.alpha) * fade;
       if (instant) e.alpha = e.target;
-      if (e.target === 0 && e.alpha < 0.01) { edges.delete(key); continue; }
       if (e.alpha > 0.25) { adj[e.a].push(e); adj[e.b].push(e); }
     }
 
