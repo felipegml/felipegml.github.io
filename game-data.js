@@ -23,7 +23,7 @@ window.GAME_DATA = [
     bannerPosition: "center center",
     shortDescription: "Dodge ricocheting fire and destroy supercomputer C4X01's capacitors as a rogue computer virus.",
     description: "Deflektor is a game about using your reflexes to survive a chaotic battleground under constant enemy fire and ricocheting projectiles.<br><br>You take the mantle of the Deflektor, a computer virus built to undermine the world threatening super computer C4X01. Use your superhuman reflexes to avoid being hit and destroy the enemy's capacitors. <br><br>Beware! The enemy turrets are immune to your attacks, so hit him only where it hurts and use your skills to become the Deflektor!",
-    palette: { background: "#101e29", glow: "#167990", accent: "#83eaff" },
+    palette: { background: "#101e29", glow: "#B40404", accent: "#29FFFE" },
     images: [
       { src: "assets/game/Deflektor1.jpg", alt: "Deflektor's pause menu over a top-down arena." },
       { src: "assets/game/Deflektor2.jpg", alt: "Deflektor gameplay with projectiles and enemies in a top-down arena." }
@@ -38,7 +38,7 @@ window.GAME_DATA = [
     bannerPosition: "center center",
     shortDescription: "Outsmart enemy forces from the shadows in this tactical stealth game where quiet strategy beats brute force.",
     description: "Embark on a dangerous mission as F.O.X. Agent deep behind enemy lines.\n\nYour objective is to complete each mission using stealth and strategy with as few engagements as possible, as these will increase the awareness of all enemies, making your mission much more difficult.\n\nRemember, less is more! Think twice before shooting.",
-    palette: { background: "#101a2b", glow: "#355c8d", accent: "#b9d8ff" },
+    palette: { background: "#101a2b", glow: "#161F2A", accent: "#FFFFFF" },
     images: [
       { src: "assets/game/fox1.jpg", alt: "F.O.X. Agent gameplay with a blue marker and red enemies on a dark map." },
       { src: "assets/game/fox2.jpg", alt: "F.O.X. Agent gameplay showing red enemies and their fields of view around obstacles." }
