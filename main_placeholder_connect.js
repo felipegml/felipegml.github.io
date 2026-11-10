@@ -9,6 +9,7 @@
   const CYAN = '0,229,255';
   const PALE = '225,250,255';
   const MAGENTA = '255,45,149';
+  const MAX_CONNECTIONS_PER_NODE = 3;
 
   let w = 0, h = 0, dpr = 1, rafId = 0, last = 0, time = 0;
   let nodes = [];
@@ -47,9 +48,9 @@
 
   function build() {
     const area = w * h;
-    const cap = isTouch || w < 700 ? 110 : 260;
-    const n = Math.max(50, Math.min(cap, Math.round(area / 9000)));
-    base = Math.max(80, Math.min(150, Math.min(w, h) * 0.14));
+    const cap = isTouch || w < 700 ? 140 : 360;
+    const n = Math.max(60, Math.min(cap, Math.round(area / 7000)));
+    base = Math.max(65, Math.min(125, Math.min(w, h) * 0.12));
     nodes = [];
     const nc = Math.max(4, Math.round(n / 22));
     const centers = [];
@@ -128,8 +129,8 @@
           const f = Math.exp(-(sd * sd) / (SW * SW)) * par.swirl;
           const wave = Math.sin(sd * 0.025 - time * 2.2);
           const ang = f * (0.5 + 0.35 * wave);
-          tox += (-sy / sd) * sd * ang * 0.35;
-          toy += (sx / sd) * sd * ang * 0.35;
+          tox += (-sy / sd) * sd * ang * 0.18;
+          toy += (sx / sd) * sd * ang * 0.18;
         }
       }
       // ripples: expanding rings push nodes radially
@@ -151,7 +152,7 @@
           const d = Math.sqrt(d2) + 0.001;
           raw = Math.exp(-d2 / R2) * alive;
           // repel up close, mild attraction at mid range
-          const mag = 16 * raw * (d / R - 0.4) / 0.6 * (1 + pointer.boost);
+          const mag = 7 * raw * (d / R - 0.4) / 0.6 * (1 + pointer.boost);
           tox += (dx / d) * mag;
           toy += (dy / d) * mag;
         }
@@ -177,6 +178,7 @@
     }
 
     for (const e of edges.values()) e.target = 0;
+    const pairs = [];
 
     for (let i = 0; i < n; i++) {
       const a = nodes[i];
@@ -201,15 +203,26 @@
             const mouseF = Math.min(1.6, 1 + 1.2 * Math.min(a.raw, b.raw));
             const thr = base * hubF * mouseF;
             const key = i * 4096 + j;
-            let e = edges.get(key);
-            if (e) {
-              if (d < thr * 1.12) { e.target = 1; e.d = d; e.thr = thr; }
-            } else if (d < thr) {
-              e = { a: i, b: j, alpha: instant ? 1 : 0, target: 1, d, thr };
-              edges.set(key, e);
-            }
+            const existing = edges.has(key);
+            if (d >= thr * (existing ? 1.12 : 1)) continue;
+            pairs.push({ a: i, b: j, d, thr, key });
           }
         }
+      }
+    }
+
+    pairs.sort((a, b) => a.d - b.d);
+    const degree = new Uint8Array(n);
+    for (const pair of pairs) {
+      if (degree[pair.a] >= MAX_CONNECTIONS_PER_NODE || degree[pair.b] >= MAX_CONNECTIONS_PER_NODE) continue;
+      degree[pair.a]++;
+      degree[pair.b]++;
+      let e = edges.get(pair.key);
+      if (e) {
+        e.target = 1; e.d = pair.d; e.thr = pair.thr;
+      } else {
+        e = { a: pair.a, b: pair.b, alpha: instant ? 1 : 0, target: 1, d: pair.d, thr: pair.thr };
+        edges.set(pair.key, e);
       }
     }
 
@@ -372,6 +385,15 @@
       dot(p.x - off, p.y, r, p.tint ? MAGENTA : VIOLET, a);
       dot(p.x + off, p.y, r, CYAN, a);
       dot(p.x, p.y, r * 0.95, PALE, Math.min(1, a + 0.1));
+    }
+    if (pointer.alive > 0.01) {
+      dot(pointer.x, pointer.y, 9, CYAN, 0.12 * pointer.alive);
+      ctx.strokeStyle = 'rgba(' + PALE + ',' + (0.75 * pointer.alive).toFixed(3) + ')';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(pointer.x, pointer.y, 7, 0, 6.2832);
+      ctx.stroke();
+      dot(pointer.x, pointer.y, 2.2, PALE, pointer.alive);
     }
     ctx.globalCompositeOperation = 'source-over';
   }
