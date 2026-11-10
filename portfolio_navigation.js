@@ -14,6 +14,51 @@
   };
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let transitionTimer;
+  let cleanupTimer;
+  const wrappedText = new WeakMap();
+
+  function prepareGlitch(view) {
+    const walker = document.createTreeWalker(view, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+    while (walker.nextNode()) {
+      if (/\S/.test(walker.currentNode.nodeValue)) textNodes.push(walker.currentNode);
+    }
+    let index = 0;
+    const wrapped = textNodes.map((node) => {
+      const original = node.nodeValue;
+      const accessible = document.createElement('span');
+      accessible.className = 'screen-reader-text';
+      accessible.textContent = original;
+      const visual = document.createElement('span');
+      visual.className = 'glitch-text';
+      visual.setAttribute('aria-hidden', 'true');
+      for (const character of Array.from(original)) {
+        if (/\s/.test(character)) {
+          visual.append(document.createTextNode(character));
+        } else {
+          const letter = document.createElement('span');
+          letter.className = 'glitch-char';
+          letter.style.setProperty('--glitch-delay', `${(index++ * 73) % 200}ms`);
+          letter.textContent = character;
+          visual.append(letter);
+        }
+      }
+      node.replaceWith(accessible, visual);
+      return { accessible, visual, original };
+    });
+    wrappedText.set(view, wrapped);
+  }
+
+  function clearGlitch(view) {
+    const wrapped = wrappedText.get(view) || [];
+    for (const { accessible, visual, original } of wrapped) {
+      accessible.replaceWith(document.createTextNode(original));
+      visual.remove();
+    }
+    wrappedText.delete(view);
+    view.classList.remove('view-leaving', 'view-entering');
+    view.inert = false;
+  }
 
   children.inert = true;
   toggle.setAttribute('aria-expanded', 'false');
@@ -25,22 +70,26 @@
 
   function showCurrentSection(animate) {
     clearTimeout(transitionTimer);
+    clearTimeout(cleanupTimer);
+    clearGlitch(home);
+    clearGlitch(sectionView);
     const key = window.location.hash.slice(1);
     const name = Object.hasOwn(sections, key) ? sections[key] : null;
     const outgoing = home.hidden ? sectionView : home;
     const incoming = name ? sectionView : home;
 
     function show() {
-      outgoing.classList.remove('view-leaving', 'view-entering');
-      outgoing.inert = false;
+      clearGlitch(outgoing);
       home.hidden = Boolean(name);
       sectionView.hidden = !name;
       if (name) sectionName.textContent = name;
       document.title = name ? `${name} placeholder | Felipe Gomes` : 'Felipe Gomes | Portfolio example';
       if (animate) {
-        incoming.classList.remove('view-entering');
-        void incoming.offsetWidth;
-        incoming.classList.add('view-entering');
+        if (!reducedMotion.matches) {
+          prepareGlitch(incoming);
+          incoming.classList.add('view-entering');
+          cleanupTimer = setTimeout(() => clearGlitch(incoming), 420);
+        }
         window.scrollTo(0, 0);
         if (name) sectionTitle.focus({ preventScroll: true });
         else home.querySelector('h1').focus({ preventScroll: true });
@@ -51,10 +100,10 @@
       show();
       return;
     }
-    outgoing.classList.remove('view-entering');
+    prepareGlitch(outgoing);
     outgoing.classList.add('view-leaving');
     outgoing.inert = true;
-    transitionTimer = setTimeout(show, 160);
+    transitionTimer = setTimeout(show, 420);
   }
 
   home.querySelector('h1').tabIndex = -1;
