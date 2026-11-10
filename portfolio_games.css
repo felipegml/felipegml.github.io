@@ -1,4 +1,4 @@
-.games-view {
+.games-view, .project-view {
   position: relative;
   width: 100%;
   max-width: 1500px;
@@ -8,10 +8,9 @@
   --game-card-width: min(65vw, 760px);
 }
 
-.games-view[hidden], .game-details[hidden], .page-error[hidden] { display: none; }
+.games-view[hidden], .project-view[hidden], .game-details[hidden], .page-error[hidden] { display: none; }
 .games-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
 .games-header h1 { font-size: clamp(3rem, 6vw, 5.5rem); }
-.games-back { width: auto; flex: none; }
 .carousel-section { margin-top: 40px; }
 .carousel-frame {
   position: relative;
@@ -80,6 +79,31 @@
 .carousel-hint.is-browsing { opacity: 0; }
 .page-error { color: #ffb1a3; }
 .games-view .footer-note { margin-top: 30px; }
+.project-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(32px, 6vw, 100px);
+  margin-top: clamp(48px, 8vh, 90px);
+  align-items: start;
+}
+.project-copy .intro-description { margin-top: 0; }
+.video-frame {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  place-items: center;
+  border: 1px solid #625344;
+  background: rgba(15, 14, 13, 0.94);
+  color: #c0bab4;
+  text-align: center;
+}
+.video-frame p { padding: 20px; line-height: 1.5; }
+.video-frame iframe { width: 100%; height: 100%; border: 0; }
+.video-fallback { position: relative; display: grid; width: 100%; height: 100%; place-items: center; color: #fff; text-decoration: none; }
+.video-fallback img { position: absolute; width: 100%; height: 100%; object-fit: cover; }
+.video-fallback span { position: relative; padding: 12px 16px; background: rgba(0, 0, 0, 0.85); border: 1px solid #f07813; }
+.video-fallback:focus-visible { outline: 2px solid #ffad63; outline-offset: 4px; }
+.project-view .footer-note { margin-top: 54px; }
 
 .game-details {
   position: fixed;
@@ -142,7 +166,6 @@ body.has-open-details { overflow: hidden; }
   .games-header { flex-direction: column; gap: 12px; }
   .games-header .eyebrow { margin-bottom: 12px; }
   .games-header h1 { font-size: 2.7rem; }
-  .games-back { min-height: 48px; }
   .carousel-section { margin-top: auto; padding-top: 14px; }
   .game-card { padding-bottom: 0; }
   .card-title { margin-top: 10px; font-size: 1.3rem; }
@@ -150,6 +173,8 @@ body.has-open-details { overflow: hidden; }
   .carousel-hint { margin: 10px 0 0; font-size: 0.72rem; }
   .games-view .footer-note { margin: auto 0 0; padding-top: 14px; font-size: 0.6rem; letter-spacing: 0.08em; }
   .details-layout { grid-template-columns: 1fr; }
+  .project-layout { grid-template-columns: 1fr; margin-top: 32px; gap: 28px; }
+  .project-view .footer-note { margin-top: 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

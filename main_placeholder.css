@@ -114,6 +114,25 @@ h1 .title-dot { color: #f07813; }
   background: rgba(15, 14, 13, 0.8);
   font-size: 0.75rem;
 }
+.social-links { margin-top: 32px; }
+.social-links ul { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0; }
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 9px 12px;
+  border: 1px solid #49433e;
+  background: rgba(15, 14, 13, 0.8);
+  color: #eeeae6;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+a.social-link:hover, a.social-link:focus-visible { border-color: #f07813; background: #21170f; }
+a.social-link:focus-visible { outline: 2px solid #ffad63; outline-offset: 4px; }
+.social-icon { width: 20px; height: 20px; flex: 0 0 20px; color: #f07813; }
+.social-letters { font-size: 1rem; font-weight: 700; text-align: center; }
+.social-unavailable { color: #aaa39c; }
 
 .explore { margin-top: 48px; }
 .section-nodes {
@@ -160,6 +179,7 @@ h1 .title-dot { color: #f07813; }
 }
 
 .node:focus-visible { outline: 2px solid #ffad63; outline-offset: 4px; }
+.home-button { width: 56px; padding: 0; justify-content: center; flex: none; }
 .node-marker {
   width: 8px;
   height: 8px;

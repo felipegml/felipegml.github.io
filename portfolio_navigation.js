@@ -7,6 +7,8 @@
   const sectionTitle = document.getElementById('section-title');
   const gamesView = document.getElementById('games-view');
   const gamesTitle = document.getElementById('games-title');
+  const projectView = document.getElementById('project-view');
+  const projectTitle = document.getElementById('project-title');
   const sections = {
     games: 'Games',
     art: 'Art',
@@ -23,7 +25,7 @@
     const walker = document.createTreeWalker(view, NodeFilter.SHOW_TEXT);
     const textNodes = [];
     while (walker.nextNode()) {
-      if (/\S/.test(walker.currentNode.nodeValue) && !walker.currentNode.parentElement.closest('.carousel-section')) {
+      if (/\S/.test(walker.currentNode.nodeValue) && !walker.currentNode.parentElement.closest('.carousel-section, .project-video')) {
         textNodes.push(walker.currentNode);
       }
     }
@@ -78,10 +80,11 @@
     clearGlitch(home);
     clearGlitch(sectionView);
     clearGlitch(gamesView);
+    clearGlitch(projectView);
     const key = window.location.hash.slice(1);
     const name = Object.hasOwn(sections, key) ? sections[key] : null;
-    const outgoing = !home.hidden ? home : !gamesView.hidden ? gamesView : sectionView;
-    const incoming = key === 'games' ? gamesView : name ? sectionView : home;
+    const outgoing = [home, gamesView, projectView, sectionView].find((view) => !view.hidden);
+    const incoming = key === 'games' ? gamesView : key === 'ar' || key === 'vr' ? projectView : name ? sectionView : home;
 
     function show() {
       clearGlitch(outgoing);
@@ -89,8 +92,9 @@
       home.hidden = incoming !== home;
       sectionView.hidden = incoming !== sectionView;
       gamesView.hidden = incoming !== gamesView;
-      if (name && key !== 'games') sectionName.textContent = name;
-      document.title = key === 'games' ? 'Felipe Gomes | Games' : name ? `${name} placeholder | Felipe Gomes` : 'Felipe Gomes | Portfolio example';
+      projectView.hidden = incoming !== projectView;
+      if (incoming === sectionView) sectionName.textContent = name;
+      document.title = incoming === gamesView || incoming === projectView ? `Felipe Gomes | ${name}` : name ? `${name} placeholder | Felipe Gomes` : 'Felipe Gomes | Portfolio example';
       if (animate) {
         if (!reducedMotion.matches) {
           prepareGlitch(incoming);
@@ -99,6 +103,7 @@
         }
         window.scrollTo(0, 0);
         if (key === 'games') gamesTitle.focus({ preventScroll: true });
+        else if (incoming === projectView) projectTitle.focus({ preventScroll: true });
         else if (name) sectionTitle.focus({ preventScroll: true });
         else home.querySelector('h1').focus({ preventScroll: true });
       }
