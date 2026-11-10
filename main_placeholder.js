@@ -402,11 +402,18 @@
     if (reduceMotion) render();
   }
 
-  window.addEventListener('pointermove', (e) => track(e.clientX, e.clientY), { passive: true });
+  window.addEventListener('pointermove', (e) => {
+    if (e.target === canvas) track(e.clientX, e.clientY);
+    else release();
+  }, { passive: true });
   document.documentElement.addEventListener('mouseleave', release);
   window.addEventListener('blur', release);
-  window.addEventListener('touchstart', (e) => track(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
-  window.addEventListener('touchmove', (e) => track(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+  window.addEventListener('touchstart', (e) => {
+    if (e.target === canvas) track(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  window.addEventListener('touchmove', (e) => {
+    if (e.target === canvas) track(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
   window.addEventListener('touchend', release);
   window.addEventListener('touchcancel', release);
 
