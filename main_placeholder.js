@@ -5,7 +5,7 @@
   const bctx = bg.getContext('2d');
 
   const LINE_COLOR = '#85817D';
-  const ORANGE_COLOR = '#F07813';
+  let lightColor = '#F07813';
   const LINE_ALPHA = 0.11;
   const NODE_ALPHA = 0.2;
   const PULSE_ALPHA = 0.55;
@@ -299,7 +299,7 @@
         const target = nodes[neighbor];
         const strength = Math.max(node.lightAlpha, target.lightAlpha);
         if (strength < 0.01) continue;
-        ctx.strokeStyle = ORANGE_COLOR;
+        ctx.strokeStyle = lightColor;
         ctx.globalAlpha = strength * 0.26;
         ctx.beginPath();
         ctx.moveTo(node.x, node.y);
@@ -311,20 +311,21 @@
     for (const node of nodes) {
       if (node.lightAlpha < 0.01) continue;
       const glow = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, 30);
-      glow.addColorStop(0, 'rgba(240,120,19,0.14)');
-      glow.addColorStop(1, 'rgba(240,120,19,0)');
+      glow.addColorStop(0, lightColor);
+      glow.addColorStop(1, 'transparent');
       ctx.fillStyle = glow;
-      ctx.globalAlpha = node.lightAlpha;
+      ctx.globalAlpha = node.lightAlpha * 0.14;
       ctx.fillRect(node.x - 30, node.y - 30, 60, 60);
-      ctx.fillStyle = ORANGE_COLOR;
+      ctx.globalAlpha = node.lightAlpha;
+      ctx.fillStyle = lightColor;
       ctx.fillRect(node.x - 1.5, node.y - 1.5, 3, 3);
     }
     ctx.globalAlpha = 1;
   }
 
   function drawPulses() {
-    ctx.strokeStyle = ORANGE_COLOR;
-    ctx.fillStyle = ORANGE_COLOR;
+    ctx.strokeStyle = lightColor;
+    ctx.fillStyle = lightColor;
     ctx.lineWidth = 1.5;
     const STEP = 6;
     for (const p of pulses) {
@@ -363,9 +364,9 @@
     drawPulses();
     if (hover) {
       ctx.globalAlpha = 1;
-      ctx.fillStyle = ORANGE_COLOR;
+      ctx.fillStyle = lightColor;
       ctx.fillRect(mx - 2, my - 2, 4, 4);
-      ctx.strokeStyle = ORANGE_COLOR;
+      ctx.strokeStyle = lightColor;
       ctx.lineWidth = 1;
       ctx.strokeRect(mx - 7.5, my - 7.5, 15, 15);
     }
@@ -416,6 +417,11 @@
   }, { passive: true });
   window.addEventListener('touchend', release);
   window.addEventListener('touchcancel', release);
+
+  window.addEventListener('portfolio-light-change', (event) => {
+    lightColor = event.detail;
+    if (reduceMotion) render();
+  });
 
   let resizeTimer;
   window.addEventListener('resize', () => {

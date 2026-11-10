@@ -5,6 +5,8 @@
   const sectionView = document.getElementById('section-view');
   const sectionName = document.getElementById('section-name');
   const sectionTitle = document.getElementById('section-title');
+  const gamesView = document.getElementById('games-view');
+  const gamesTitle = document.getElementById('games-title');
   const sections = {
     games: 'Games',
     art: 'Art',
@@ -21,7 +23,9 @@
     const walker = document.createTreeWalker(view, NodeFilter.SHOW_TEXT);
     const textNodes = [];
     while (walker.nextNode()) {
-      if (/\S/.test(walker.currentNode.nodeValue)) textNodes.push(walker.currentNode);
+      if (/\S/.test(walker.currentNode.nodeValue) && !walker.currentNode.parentElement.closest('.carousel-section')) {
+        textNodes.push(walker.currentNode);
+      }
     }
     let index = 0;
     const wrapped = textNodes.map((node) => {
@@ -73,17 +77,20 @@
     clearTimeout(cleanupTimer);
     clearGlitch(home);
     clearGlitch(sectionView);
+    clearGlitch(gamesView);
     const key = window.location.hash.slice(1);
     const name = Object.hasOwn(sections, key) ? sections[key] : null;
-    const outgoing = home.hidden ? sectionView : home;
-    const incoming = name ? sectionView : home;
+    const outgoing = !home.hidden ? home : !gamesView.hidden ? gamesView : sectionView;
+    const incoming = key === 'games' ? gamesView : name ? sectionView : home;
 
     function show() {
       clearGlitch(outgoing);
-      home.hidden = Boolean(name);
-      sectionView.hidden = !name;
-      if (name) sectionName.textContent = name;
-      document.title = name ? `${name} placeholder | Felipe Gomes` : 'Felipe Gomes | Portfolio example';
+      window.dispatchEvent(new CustomEvent('portfolio-section-change', { detail: key }));
+      home.hidden = incoming !== home;
+      sectionView.hidden = incoming !== sectionView;
+      gamesView.hidden = incoming !== gamesView;
+      if (name && key !== 'games') sectionName.textContent = name;
+      document.title = key === 'games' ? 'Felipe Gomes | Games' : name ? `${name} placeholder | Felipe Gomes` : 'Felipe Gomes | Portfolio example';
       if (animate) {
         if (!reducedMotion.matches) {
           prepareGlitch(incoming);
@@ -91,7 +98,8 @@
           cleanupTimer = setTimeout(() => clearGlitch(incoming), 420);
         }
         window.scrollTo(0, 0);
-        if (name) sectionTitle.focus({ preventScroll: true });
+        if (key === 'games') gamesTitle.focus({ preventScroll: true });
+        else if (name) sectionTitle.focus({ preventScroll: true });
         else home.querySelector('h1').focus({ preventScroll: true });
       }
     }
@@ -114,9 +122,10 @@
         link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
     const destination = new URL(link.href);
     if (link.dataset.section) {
-      const placeholder = new URL('portfolio_placeholder.html', window.location.href);
-      if (destination.origin !== placeholder.origin || destination.pathname !== placeholder.pathname ||
-          destination.searchParams.get('section') !== link.dataset.section) return;
+      const expected = new URL(link.dataset.section === 'games' ? 'gamepage.html' : 'portfolio_placeholder.html', window.location.href);
+      if (destination.origin !== expected.origin || destination.pathname !== expected.pathname ||
+          (link.dataset.section !== 'games' && destination.searchParams.get('section') !== link.dataset.section) ||
+          (link.dataset.section === 'games' && destination.search)) return;
     } else if (destination.origin !== window.location.origin || destination.pathname !== window.location.pathname) {
       return;
     }

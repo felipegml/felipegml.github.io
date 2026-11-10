@@ -12,7 +12,14 @@ html, body {
   min-height: 100%;
 }
 
-body { background: #080808; }
+html { overflow-x: clip; }
+
+body {
+  background: #080808;
+  container-type: inline-size;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
 #grid {
   position: fixed;
@@ -300,6 +307,7 @@ h1 .title-dot { color: #f07813; }
 
 @media (max-width: 600px) {
   .portfolio { align-items: flex-start; padding: 68px 24px 48px; }
+  .portfolio:has(.games-view:not([hidden])) { padding-top: 24px; padding-bottom: 20px; }
   .footer-note { margin-top: 40px; }
 }
 

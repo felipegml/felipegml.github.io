@@ -6,8 +6,9 @@
   <meta name="color-scheme" content="dark">
   <title>Felipe Gomes | Portfolio example</title>
   <link rel="stylesheet" href="main_placeholder.css">
+  <link rel="stylesheet" href="portfolio_games.css">
 </head>
-<body>
+<body data-game-embedded>
   <canvas id="grid" aria-hidden="true"></canvas>
   <main class="portfolio">
     <div class="portfolio-content">
@@ -28,7 +29,7 @@
       <nav class="explore" aria-label="Portfolio sections">
         <p class="section-label">Explore <span> / select a node</span></p>
         <ul class="section-nodes">
-          <li><a class="node" href="portfolio_placeholder.html?section=games" data-section="games"><span class="node-marker" aria-hidden="true"></span><span>Games</span><span class="node-arrow" aria-hidden="true">↗</span></a></li>
+          <li><a class="node" href="gamepage.html" data-section="games"><span class="node-marker" aria-hidden="true"></span><span>Games</span><span class="node-arrow" aria-hidden="true">↗</span></a></li>
           <li><a class="node" href="portfolio_placeholder.html?section=art" data-section="art"><span class="node-marker" aria-hidden="true"></span><span>Art</span><span class="node-arrow" aria-hidden="true">↗</span></a></li>
           <li class="project-branch">
             <button class="node node-toggle" type="button" aria-expanded="true" aria-controls="project-nodes">
@@ -52,8 +53,47 @@
       <p class="intro-description">This is a placeholder for future work. There is more to come.</p>
       <a class="node" href="main_placeholder.html" data-home><span class="node-marker" aria-hidden="true"></span> Back to portfolio <span class="node-arrow" aria-hidden="true">↗</span></a>
     </section>
+    <section class="games-view" id="games-view" aria-labelledby="games-title" hidden>
+      <header class="games-header">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-marker" aria-hidden="true"></span> Portfolio / Selected work</p>
+          <h1 id="games-title" tabindex="-1">Games<span class="title-dot">.</span></h1>
+        </div>
+        <a class="node games-back" href="main_placeholder.html" data-home><span class="node-marker" aria-hidden="true"></span> Back to portfolio <span class="node-arrow" aria-hidden="true">↗</span></a>
+      </header>
+      <div class="carousel-section" aria-label="Games">
+        <div class="carousel-frame">
+          <div class="carousel-viewport" id="carouselViewport" role="region" aria-label="Game carousel" aria-describedby="carouselHint" tabindex="0">
+            <div class="carousel-track" id="carouselTrack"></div>
+          </div>
+        </div>
+        <p class="carousel-status" id="carouselStatus" aria-live="polite" aria-atomic="true"></p>
+        <p class="carousel-hint" id="carouselHint">Drag, swipe, or use the arrow keys to browse. Select a game to see more.</p>
+      </div>
+      <p class="page-error" id="pageError" role="alert" hidden></p>
+      <p class="footer-note">&copy; 2026 Felipe Gomes - @satsuyafrango. All rights reserved.</p>
+    </section>
   </main>
+  <section class="game-details" id="gameDetails" role="dialog" aria-modal="true" aria-labelledby="detailsTitle" hidden>
+    <div class="details-panel">
+      <button class="details-close" id="closeDetails" type="button" aria-label="Close game details">×</button>
+      <div class="details-layout">
+        <div class="details-copy">
+          <p class="section-label">About the game</p>
+          <h2 id="detailsTitle"></h2>
+          <p class="details-description" id="detailsDescription"></p>
+          <a class="play-link" id="playLink" target="_blank" rel="noopener noreferrer"></a>
+        </div>
+        <div class="details-gallery">
+          <h3>Gallery</h3>
+          <div class="game-grid" id="gameGrid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script src="game-data.js"></script>
   <script src="main_placeholder.js"></script>
+  <script src="gamepage.js"></script>
   <script src="portfolio_navigation.js"></script>
 </body>
 </html>

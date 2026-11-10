@@ -11,6 +11,8 @@ const gameGrid = document.getElementById("gameGrid");
 const pageError = document.getElementById("pageError");
 const backgroundSections = document.querySelectorAll("body > header, body > main, body > footer");
 const games = window.GAME_DATA;
+const embeddedGames = document.body.hasAttribute("data-game-embedded");
+let embeddedActive = false;
 
 function isValidGame(game) {
   if (!game || typeof game.title !== "string" || !game.title ||
@@ -125,9 +127,15 @@ function startGamePage(gameData) {
   function setActive(index) {
     activeIndex = Math.max(0, Math.min(index, gameData.length - 1));
     const game = gameData[activeIndex];
-    document.documentElement.style.setProperty("--background", game.palette.background);
-    document.documentElement.style.setProperty("--glow", game.palette.glow);
-    document.documentElement.style.setProperty("--accent", game.palette.accent);
+    if (embeddedGames) {
+      if (embeddedActive) {
+        window.dispatchEvent(new CustomEvent("portfolio-light-change", { detail: game.palette.glow }));
+      }
+    } else {
+      document.documentElement.style.setProperty("--background", game.palette.background);
+      document.documentElement.style.setProperty("--glow", game.palette.glow);
+      document.documentElement.style.setProperty("--accent", game.palette.accent);
+    }
     status.textContent = `${activeIndex + 1} / ${gameData.length}: ${game.title}`;
     if (!details.hidden) {
       updateDetails();
@@ -242,6 +250,7 @@ function startGamePage(gameData) {
     if (!scrollFrame) {
       scrollFrame = requestAnimationFrame(() => {
         scrollFrame = 0;
+        if (embeddedGames && !embeddedActive) return;
         const index = nearestCardIndex();
         if (details.hidden && index !== activeIndex) {
           setActive(index);
@@ -317,8 +326,26 @@ function startGamePage(gameData) {
       suppressClick = false;
     }
   }, true);
-  window.addEventListener("resize", () => centerCard(activeIndex, false));
+  window.addEventListener("resize", () => {
+    if (!embeddedGames || embeddedActive) centerCard(activeIndex, false);
+  });
+
+  if (embeddedGames) {
+    window.addEventListener("portfolio-section-change", (event) => {
+      embeddedActive = event.detail === "games";
+      if (!embeddedActive) {
+        cancelAnimationFrame(centeringFrame);
+        if (!details.hidden) closeDetails.click();
+        window.dispatchEvent(new CustomEvent("portfolio-light-change", { detail: "#F07813" }));
+      } else {
+        setActive(activeIndex);
+        requestAnimationFrame(() => {
+          if (embeddedActive) centerCard(activeIndex, false);
+        });
+      }
+    });
+  }
 
   setActive(0);
-  centerCard(0, false);
+  if (!embeddedGames) centerCard(0, false);
 }
