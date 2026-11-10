@@ -4,17 +4,18 @@
   const bg = document.createElement('canvas');
   const bctx = bg.getContext('2d');
 
-  const LINE_COLOR = '#DADADA';
-  const LINE_ALPHA = 0.08;
-  const NODE_ALPHA = 0.18;
-  const PULSE_ALPHA = 0.5;
+  const LINE_COLOR = '#85817D';
+  const ORANGE_COLOR = '#F07813';
+  const LINE_ALPHA = 0.11;
+  const NODE_ALPHA = 0.2;
+  const PULSE_ALPHA = 0.55;
   const PULSE_SPEED = 190;
   const PULSE_TRAIL = 90;
   const SEEK_BIAS = 0.9;
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let w = 0, h = 0, dpr = 1, cell = 36, nodes = [];
+  let w = 0, h = 0, dpr = 1, cell = 104, nodes = [], faces = [];
   let mx = 0, my = 0, hover = false;
   let pulses = [];
   let last = 0;
@@ -22,43 +23,70 @@
   function drawBackground() {
     bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     bctx.clearRect(0, 0, w, h);
-    bctx.strokeStyle = LINE_COLOR;
-    bctx.fillStyle = LINE_COLOR;
+    for (const face of faces) {
+      const a = nodes[face.a], b = nodes[face.b], c = nodes[face.c];
+      bctx.fillStyle = '#383838';
+      bctx.globalAlpha = face.alpha;
+      bctx.beginPath();
+      bctx.moveTo(a.x, a.y);
+      bctx.lineTo(b.x, b.y);
+      bctx.lineTo(c.x, c.y);
+      bctx.closePath();
+      bctx.fill();
+    }
+
     bctx.lineWidth = 1;
-    bctx.globalAlpha = LINE_ALPHA;
-    bctx.beginPath();
     for (const node of nodes) {
       for (const neighbor of node.neighbors) {
         if (neighbor <= node.index) continue;
         const target = nodes[neighbor];
+        bctx.strokeStyle = LINE_COLOR;
+        bctx.globalAlpha = LINE_ALPHA;
+        bctx.beginPath();
         bctx.moveTo(node.x, node.y);
         bctx.lineTo(target.x, target.y);
+        bctx.stroke();
       }
     }
-    bctx.stroke();
-    bctx.globalAlpha = NODE_ALPHA;
     for (const node of nodes) {
+      bctx.fillStyle = LINE_COLOR;
+      bctx.globalAlpha = NODE_ALPHA;
       bctx.fillRect(node.x - 1, node.y - 1, 2, 2);
     }
+    bctx.globalAlpha = 1;
   }
 
   function buildMesh() {
     nodes = [];
+    faces = [];
     const spacing = cell;
-    const cols = Math.ceil(w / spacing);
-    const rows = Math.ceil(h / spacing);
+    const cols = Math.ceil(w / spacing) + 2;
+    const rows = Math.ceil(h / spacing) + 2;
     for (let j = 0; j < rows; j++) {
       for (let i = 0; i < cols; i++) {
         nodes.push({
           index: nodes.length,
-          x: Math.min(w, (i + 0.2 + Math.random() * 0.6) * spacing),
-          y: Math.min(h, (j + 0.2 + Math.random() * 0.6) * spacing),
-          neighbors: []
+          x: (i - 1 + 0.2 + Math.random() * 0.6) * spacing,
+          y: (j - 1 + 0.2 + Math.random() * 0.6) * spacing,
+          neighbors: [],
+          lightAlpha: 0,
+          lightTarget: false,
+          lightTimer: 0
         });
       }
     }
 
     if (nodes.length < 3) return;
+
+    const lightNodes = nodes.slice();
+    const lightCount = Math.max(1, Math.round(nodes.length * 0.1));
+    for (let i = 0; i < lightCount; i++) {
+      const pick = i + Math.floor(Math.random() * (lightNodes.length - i));
+      [lightNodes[i], lightNodes[pick]] = [lightNodes[pick], lightNodes[i]];
+      lightNodes[i].lightAlpha = 1;
+      lightNodes[i].lightTarget = true;
+      lightNodes[i].lightTimer = 3 + Math.random() * 7;
+    }
 
     const points = nodes.map(({ x, y }) => ({ x, y }));
     const span = Math.max(w, h);
@@ -95,6 +123,12 @@
 
     for (const [a, b, c] of triangles) {
       if (a >= firstSuper || b >= firstSuper || c >= firstSuper) continue;
+      faces.push({
+        a,
+        b,
+        c,
+        alpha: 0.035 + Math.random() * 0.075
+      });
       connectNodes(a, b);
       connectNodes(b, c);
       connectNodes(c, a);
@@ -124,7 +158,8 @@
   }
 
   function spawn(p) {
-    p.i = Math.floor(Math.random() * nodes.length);
+    const lightNodes = nodes.filter((node) => node.lightTarget);
+    p.i = lightNodes[Math.floor(Math.random() * lightNodes.length)].index;
     p.previous = -1;
     p.next = undefined;
     p.hops = 8 + Math.floor(Math.random() * 20);
@@ -228,9 +263,68 @@
     }
   }
 
+  function updateLights(dt) {
+    for (const node of nodes) {
+      if (node.lightTarget) {
+        node.lightTimer -= dt;
+        if (node.lightTimer <= 0) {
+          const start = Math.floor(Math.random() * nodes.length);
+          let replacement;
+          for (let i = 0; i < nodes.length; i++) {
+            const candidate = nodes[(start + i) % nodes.length];
+            if (!candidate.lightTarget && candidate.lightAlpha < 0.01) {
+              replacement = candidate;
+              break;
+            }
+          }
+          if (replacement) {
+            node.lightTarget = false;
+            replacement.lightTarget = true;
+            replacement.lightTimer = 3 + Math.random() * 7;
+          } else {
+            node.lightTimer = 0.5;
+          }
+        }
+      }
+      const target = node.lightTarget ? 1 : 0;
+      node.lightAlpha += (target - node.lightAlpha) * Math.min(1, dt / 1.1);
+    }
+  }
+
+  function drawLights() {
+    ctx.lineWidth = 1;
+    for (const node of nodes) {
+      for (const neighbor of node.neighbors) {
+        if (neighbor <= node.index) continue;
+        const target = nodes[neighbor];
+        const strength = Math.max(node.lightAlpha, target.lightAlpha);
+        if (strength < 0.01) continue;
+        ctx.strokeStyle = ORANGE_COLOR;
+        ctx.globalAlpha = strength * 0.26;
+        ctx.beginPath();
+        ctx.moveTo(node.x, node.y);
+        ctx.lineTo(target.x, target.y);
+        ctx.stroke();
+      }
+    }
+
+    for (const node of nodes) {
+      if (node.lightAlpha < 0.01) continue;
+      const glow = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, 30);
+      glow.addColorStop(0, 'rgba(240,120,19,0.14)');
+      glow.addColorStop(1, 'rgba(240,120,19,0)');
+      ctx.fillStyle = glow;
+      ctx.globalAlpha = node.lightAlpha;
+      ctx.fillRect(node.x - 30, node.y - 30, 60, 60);
+      ctx.fillStyle = ORANGE_COLOR;
+      ctx.fillRect(node.x - 1.5, node.y - 1.5, 3, 3);
+    }
+    ctx.globalAlpha = 1;
+  }
+
   function drawPulses() {
-    ctx.strokeStyle = LINE_COLOR;
-    ctx.fillStyle = LINE_COLOR;
+    ctx.strokeStyle = ORANGE_COLOR;
+    ctx.fillStyle = ORANGE_COLOR;
     ctx.lineWidth = 1.5;
     const STEP = 6;
     for (const p of pulses) {
@@ -265,12 +359,13 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(bg, 0, 0);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawLights();
     drawPulses();
     if (hover) {
       ctx.globalAlpha = 1;
-      ctx.fillStyle = LINE_COLOR;
+      ctx.fillStyle = ORANGE_COLOR;
       ctx.fillRect(mx - 2, my - 2, 4, 4);
-      ctx.strokeStyle = LINE_COLOR;
+      ctx.strokeStyle = ORANGE_COLOR;
       ctx.lineWidth = 1;
       ctx.strokeRect(mx - 7.5, my - 7.5, 15, 15);
     }
@@ -279,6 +374,7 @@
   function frame(t) {
     const dt = Math.min(0.05, last ? (t - last) / 1000 : 0.016);
     last = t;
+    updateLights(dt);
     updatePulses(dt);
     render();
     requestAnimationFrame(frame);
@@ -290,7 +386,7 @@
     h = window.innerHeight;
     canvas.width = bg.width = Math.round(w * dpr);
     canvas.height = bg.height = Math.round(h * dpr);
-    cell = w < 600 ? 32 : w > 1600 ? 42 : 36;
+    cell = w < 600 ? 76 : w > 1600 ? 124 : 104;
     buildMesh();
     drawBackground();
     initPulses();
