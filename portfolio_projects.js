@@ -1,13 +1,13 @@
 (() => {
   const projects = {
     ar: {
-      name: 'AR',
-      description: 'A space for augmented reality projects and experiences. Project details are coming soon.',
+      name: 'Augmented Reality',
+      description: 'A collection of augmented reality projects exploring new ways to blend digital experiences with the physical world.\n\nFrom interactive brand activations and immersive experiences to creative AR experiments, these projects bring ideas to life through technology, design, and innovation.\n\nCreated for brands including LG, Claro, Heineken, Globo, and others.',
       videoUrl: 'https://www.youtube.com/watch?v=HvNf1Pdw5Ro'
     },
     vr: {
-      name: 'VR',
-      description: 'A space for virtual reality projects and experiences. Project details are coming soon.',
+      name: 'Virtual Reality',
+      description: "A collection of virtual reality projects exploring immersive worlds, interactive storytelling, and shared experiences.\n\nFrom multiplayer environments and collaborative experiences to immersive brand activations and virtual worlds, these projects push the boundaries of how people connect, play, and experience digital spaces.\n\nProjects for Sebrae and Claro, as well as a VR experience for Netflix's Stranger Things series.",
       videoUrl: 'https://www.youtube.com/watch?v=MzHEDac4kD8'
     }
   };

@@ -12,8 +12,8 @@
   const sections = {
     games: 'Games',
     art: 'Art',
-    ar: 'AR',
-    vr: 'VR',
+    ar: 'Augmented Reality',
+    vr: 'Virtual Reality',
     prototype: 'Prototype'
   };
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');

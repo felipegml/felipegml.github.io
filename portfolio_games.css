@@ -86,7 +86,7 @@
   margin-top: clamp(48px, 8vh, 90px);
   align-items: start;
 }
-.project-copy .intro-description { margin-top: 0; }
+.project-copy .intro-description { margin-top: 0; white-space: pre-line; }
 .video-frame {
   display: grid;
   width: 100%;

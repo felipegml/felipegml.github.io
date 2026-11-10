@@ -89,7 +89,7 @@ h1 > .surname, h1 > #section-name { color: #b7b0aa; }
 h1 .title-dot { color: #f07813; }
 
 .intro-description {
-  max-width: 480px;
+  max-width: 580px;
   margin: 24px 0 0;
   color: #c0bab4;
   font-size: clamp(1rem, 1.5vw, 1.2rem);
