@@ -17,6 +17,7 @@
     art: 'Art',
     ar: 'Augmented Reality',
     vr: 'Virtual Reality',
+    'financial-app': 'Financial App',
     prototype: 'Prototype'
   };
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -28,7 +29,7 @@
     const walker = document.createTreeWalker(view, NodeFilter.SHOW_TEXT);
     const textNodes = [];
     while (walker.nextNode()) {
-      if (/\S/.test(walker.currentNode.nodeValue) && !walker.currentNode.parentElement.closest('.carousel-section, .project-video')) {
+      if (/\S/.test(walker.currentNode.nodeValue) && !walker.currentNode.parentElement.closest('.carousel-section, .project-video, .project-gallery')) {
         textNodes.push(walker.currentNode);
       }
     }
@@ -87,7 +88,7 @@
     const key = window.location.hash.slice(1);
     const name = Object.hasOwn(sections, key) ? sections[key] : null;
     const outgoing = [home, gamesView, projectView, sectionView].find((view) => !view.hidden);
-    const incoming = key === 'games' ? gamesView : key === 'ar' || key === 'vr' ? projectView : name ? sectionView : home;
+    const incoming = key === 'games' ? gamesView : key === 'ar' || key === 'vr' || key === 'financial-app' ? projectView : name ? sectionView : home;
 
     function show() {
       clearGlitch(outgoing);
@@ -130,9 +131,10 @@
         link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
     const destination = new URL(link.href);
     if (link.dataset.section) {
-      const expected = new URL(link.dataset.section === 'games' ? 'gamepage.html' : 'portfolio_placeholder.html', window.location.href);
+      const expected = new URL(link.dataset.section === 'games' ? 'gamepage.html' : link.dataset.section === 'financial-app' ? 'index.html#financial-app' : 'portfolio_placeholder.html', window.location.href);
       if (destination.origin !== expected.origin || destination.pathname !== expected.pathname ||
-          (link.dataset.section !== 'games' && destination.searchParams.get('section') !== link.dataset.section) ||
+          (link.dataset.section === 'financial-app' && (destination.search || destination.hash !== expected.hash)) ||
+          (link.dataset.section !== 'games' && link.dataset.section !== 'financial-app' && destination.searchParams.get('section') !== link.dataset.section) ||
           (link.dataset.section === 'games' && destination.search)) return;
     } else if (destination.origin !== window.location.origin || destination.pathname !== window.location.pathname) {
       return;

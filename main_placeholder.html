@@ -54,6 +54,7 @@
               <ul class="child-nodes">
                 <li><a class="node child-node" href="portfolio_placeholder.html?section=ar" data-section="ar"><span class="node-marker" aria-hidden="true"></span><span>AR</span><span class="node-arrow" aria-hidden="true">↗</span></a></li>
                 <li><a class="node child-node" href="portfolio_placeholder.html?section=vr" data-section="vr"><span class="node-marker" aria-hidden="true"></span><span>VR</span><span class="node-arrow" aria-hidden="true">↗</span></a></li>
+                <li><a class="node child-node" href="index.html#financial-app" data-section="financial-app"><span class="node-marker" aria-hidden="true"></span><span>Financial App</span><span class="node-arrow" aria-hidden="true">↗</span></a></li>
                 <li><a class="node child-node" href="portfolio_placeholder.html?section=prototype" data-section="prototype"><span class="node-marker" aria-hidden="true"></span><span>Prototype</span><span class="node-arrow" aria-hidden="true">↗</span></a></li>
               </ul>
             </div>
@@ -99,16 +100,24 @@
       <div class="project-layout">
         <div class="project-copy">
           <p class="section-label">About the project</p>
-          <p class="intro-description" id="project-description"></p>
+          <div class="intro-description" id="project-description"></div>
         </div>
         <div class="project-video">
           <p class="section-label">Project video</p>
           <div class="video-frame" id="project-player"><p>Project video not yet available.</p></div>
         </div>
+        <div class="project-gallery" hidden>
+          <p class="section-label">Project images</p>
+          <div class="project-image-grid" id="project-image-grid"></div>
+        </div>
       </div>
       <p class="footer-note">&copy; 2026 Felipe Gomes - @satsuyafrango. All rights reserved.</p>
     </section>
   </main>
+  <dialog class="project-image-dialog" id="project-image-dialog" aria-label="Project image">
+    <button class="details-close project-image-close" type="button" aria-label="Close image">×</button>
+    <img id="project-dialog-image" alt="">
+  </dialog>
   <section class="game-details" id="gameDetails" role="dialog" aria-modal="true" aria-labelledby="detailsTitle" hidden>
     <div class="details-panel">
       <button class="details-close" id="closeDetails" type="button" aria-label="Close game details">×</button>
