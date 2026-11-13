@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Constellation sphere</title>
+  <link rel="stylesheet" href="main_placeholder_connect.css">
+</head>
+<body data-sky="constellations">
+  <canvas id="field" tabindex="0" role="application" aria-label="Interactive constellation sphere" aria-describedby="sphere-hint"></canvas>
+  <p id="constellation-info" role="status" hidden></p>
+  <p id="sphere-hint">Drag, swipe, or use the arrow keys to rotate. Hover or tap a constellation to identify it.</p>
+  <p id="sky-error" role="alert" hidden>Unable to load the constellation data.</p>
+  <script src="constellation_data.js"></script>
+  <script src="main_placeholder_connect.js"></script>
+</body>
+</html>

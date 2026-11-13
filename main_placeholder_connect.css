@@ -14,5 +14,51 @@ canvas {
   width: 100%;
   height: 100%;
   touch-action: none;
-  cursor: none;
+  cursor: grab;
+}
+
+canvas.dragging {
+  cursor: grabbing;
+}
+
+canvas:focus-visible {
+  outline: 2px solid #00e5ff;
+  outline-offset: -4px;
+}
+
+#sphere-hint {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  margin: 0;
+  color: #b6c4d6;
+  font: 0.75rem/1.4 sans-serif;
+  text-align: center;
+  pointer-events: none;
+}
+
+#sky-error {
+  position: fixed;
+  inset: 1rem;
+  color: #fff;
+  font: 1rem/1.5 sans-serif;
+}
+
+#constellation-info {
+  position: fixed;
+  top: max(1rem, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.55rem 1rem;
+  max-width: calc(100% - 2rem);
+  border: 1px solid rgba(225, 250, 255, 0.2);
+  border-radius: 0.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  color: #e1faff;
+  font: 600 1rem/1.4 "Trebuchet MS", Arial, sans-serif;
+  letter-spacing: 0.03em;
+  text-align: center;
+  pointer-events: none;
 }

@@ -4,346 +4,440 @@
   const canvas = document.getElementById('field');
   const ctx = canvas.getContext('2d', { alpha: false });
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
+  const isConstellationSky = document.body.dataset.sky === 'constellations';
+  const sky = isConstellationSky ? window.constellationSky : null;
+  if (isConstellationSky && !sky) {
+    document.getElementById('sky-error').hidden = false;
+    console.error('Unable to load the constellation sky data.');
+    return;
+  }
   const VIOLET = '139,92,246';
   const CYAN = '0,229,255';
   const PALE = '225,250,255';
   const MAGENTA = '255,45,149';
+  const NEAR = 0.05;
+  const BASE_DISTANCE = 0.23;
 
-  let w = 0, h = 0, dpr = 1, rafId = 0, last = 0, time = 0;
-  let nodes = [];
-  let base = 110;       // base connection distance
-  let isTouch = false;
-  const edges = new Map();
-  const pulses = [];
-  let adj = [];
-
-  const ripples = [];
-  const par = { x: 0, y: 0, swirl: 0 };
-  let lastRipple = { x: -9999, y: -9999 };
-
-  function addRipple(x, y, strength) {
-    if (ripples.length < 6) ripples.push({ x, y, r: 0, s: strength });
+  let w = 0, h = 0, focal = 1, rafId = 0, last = 0, time = 0;
+  const camera = {
+    right: { x: 1, y: 0, z: 0 },
+    up: { x: 0, y: 1, z: 0 },
+    forward: { x: 0, y: 0, z: 1 }
+  };
+  if (sky) {
+    const angle = 84 * Math.PI / 180;
+    camera.right = { x: Math.cos(angle), y: 0, z: Math.sin(angle) };
+    camera.forward = { x: -Math.sin(angle), y: 0, z: Math.cos(angle) };
   }
+  let drag = null;
+  const pointer = { x: 0, y: 0, active: false, touch: false };
+  let lastRipple = { x: -9999, y: -9999 };
+  const pulses = [];
+  const ripples = [];
+  const nodes = [];
+  const edges = [];
+  const triangles = [];
+  const adjacency = [];
+  const constellationInfo = sky ? document.getElementById('constellation-info') : null;
+  let hoveredConstellation = null, selectedConstellation = null;
 
-  const pointer = { x: -9999, y: -9999, px: -9999, py: -9999, alive: 0, active: false, boost: 0 };
+  function normalize(x, y, z) {
+    const length = Math.hypot(x, y, z);
+    return { x: x / length, y: y / length, z: z / length };
+  }
 
   function gauss() {
     return Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random());
   }
 
-  function makeNode(x, y, hub) {
-    const r = hub ? 2.6 + Math.random() * 1.0 : 1.1 + Math.random() * 0.9;
+  function randomDirection() {
+    const y = Math.random() * 2 - 1;
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.sqrt(1 - y * y);
+    return { x: radius * Math.cos(angle), y, z: radius * Math.sin(angle) };
+  }
+
+  function addNode(p, hub, magnitude) {
+    const tangent = Math.abs(p.y) < 0.9
+      ? normalize(p.z, 0, -p.x)
+      : normalize(0, -p.z, p.y);
+    const tangent2 = {
+      x: p.y * tangent.z - p.z * tangent.y,
+      y: p.z * tangent.x - p.x * tangent.z,
+      z: p.x * tangent.y - p.y * tangent.x
+    };
+    nodes.push({
+      ...p, tangent, tangent2, hub,
+      r: sky ? Math.max(0.65, Math.min(2.8, 2.5 - magnitude * 0.3)) : (hub ? 2.6 + Math.random() : 1.1 + Math.random() * 0.9),
+      op: sky ? Math.max(0.3, Math.min(1, (7 - magnitude) / 5)) : 0.55 + Math.random() * 0.45,
+      tint: Math.random() < 0.08,
+      ax: sky ? 0 : 0.003 + Math.random() * 0.009, ay: sky ? 0 : 0.003 + Math.random() * 0.009,
+      sxSpeed: 0.04 + Math.random() * 0.09, sySpeed: 0.04 + Math.random() * 0.09,
+      px: Math.random() * Math.PI * 2, py: Math.random() * Math.PI * 2,
+      ox: 0, oy: 0, raw: 0, act: 0, flash: 0,
+      cx: 0, cy: 0, cz: 0, sx: 0, sy: 0, visible: false
+    });
+    adjacency.push([]);
+  }
+
+  function makeFace(a, b, c) {
+    const p = nodes[a], q = nodes[b], r = nodes[c];
+    const ux = q.x - p.x, uy = q.y - p.y, uz = q.z - p.z;
+    const vx = r.x - p.x, vy = r.y - p.y, vz = r.z - p.z;
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    if (nx * p.x + ny * p.y + nz * p.z < 0) {
+      [b, c] = [c, b];
+      nx = -nx; ny = -ny; nz = -nz;
+    }
+    return { a, b, c, nx, ny, nz, distance: nx * p.x + ny * p.y + nz * p.z };
+  }
+
+  function celestialDirection(ra, dec) {
+    const longitude = ra * Math.PI / 180, latitude = dec * Math.PI / 180;
     return {
-      hx: x, hy: y, x, y, ox: 0, oy: 0,
-      ax: 6 + Math.random() * 16, ay: 6 + Math.random() * 16,
-      sx: 0.04 + Math.random() * 0.09, sy: 0.04 + Math.random() * 0.09,
-      px: Math.random() * 6.283, py: Math.random() * 6.283,
-      r, hub, op: 0.55 + Math.random() * 0.45,
-      raw: 0, act: 0, flash: 0, tint: Math.random() < 0.08, cell: 0,
-      depth: hub ? 1.2 : 0.3 + Math.random() * 0.8
+      x: -Math.cos(latitude) * Math.sin(longitude),
+      y: Math.sin(latitude),
+      z: Math.cos(latitude) * Math.cos(longitude)
     };
   }
 
-  function triangulate(points) {
-    if (points.length < 3) return [];
-    const coords = points.map(({ x, y }) => ({ x, y }));
-    const span = Math.max(w, h);
-    const centerX = w / 2, centerY = h / 2;
-    const firstSuper = points.length;
-    coords.push(
-      { x: centerX - span * 20, y: centerY - span * 10 },
-      { x: centerX, y: centerY + span * 20 },
-      { x: centerX + span * 20, y: centerY - span * 10 }
-    );
+  function buildConstellationSky() {
+    const connected = new Set();
+    const edgeKeys = new Set();
+    for (const [a, b] of sky.lines) {
+      connected.add(a);
+      connected.add(b);
+    }
+    for (let i = 0; i < sky.stars.length; i++) {
+      const [ra, dec, magnitude] = sky.stars[i];
+      addNode(celestialDirection(ra, dec), connected.has(i), magnitude);
+    }
+    for (const [a, b, constellations] of sky.lines) {
+      edges.push({ a, b, constellations, alpha: 1, target: 1, d: 0 });
+      edgeKeys.add(Math.min(a, b) * nodes.length + Math.max(a, b));
+    }
 
-    let triangles = [makeTriangle(firstSuper, firstSuper + 1, firstSuper + 2, coords)];
-    for (let pointIndex = 0; pointIndex < points.length; pointIndex++) {
-      const boundary = new Map();
-      const remaining = [];
-      for (const triangle of triangles) {
-        if (containsInCircumcircle(triangle, coords[pointIndex], coords)) {
-          for (let edge = 0; edge < 3; edge++) {
-            const a = triangle[edge], b = triangle[(edge + 1) % 3];
-            const key = a < b ? a + ':' + b : b + ':' + a;
-            const entry = boundary.get(key);
-            if (entry) entry.count++;
-            else boundary.set(key, { a, b, count: 1 });
+    const radius = 0.065;
+    const cells = new Map();
+    function cellKey(x, y, z) {
+      return x + ':' + y + ':' + z;
+    }
+    for (let i = 0; i < nodes.length; i++) {
+      const p = nodes[i];
+      const x = Math.floor((p.x + 1) / radius), y = Math.floor((p.y + 1) / radius), z = Math.floor((p.z + 1) / radius);
+      const key = cellKey(x, y, z);
+      if (!cells.has(key)) cells.set(key, []);
+      cells.get(key).push(i);
+    }
+    for (let i = 0; i < nodes.length; i++) {
+      const p = nodes[i], candidates = [];
+      const x = Math.floor((p.x + 1) / radius), y = Math.floor((p.y + 1) / radius), z = Math.floor((p.z + 1) / radius);
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dz = -1; dz <= 1; dz++) {
+            const cell = cells.get(cellKey(x + dx, y + dy, z + dz));
+            if (!cell) continue;
+            for (const j of cell) {
+              if (i === j) continue;
+              const a = Math.min(i, j), b = Math.max(i, j);
+              const key = a * nodes.length + b;
+              if (edgeKeys.has(key)) continue;
+              const q = nodes[j];
+              const distance = (p.x - q.x) ** 2 + (p.y - q.y) ** 2 + (p.z - q.z) ** 2;
+              if (distance < radius * radius) candidates.push({ a, b, key, distance });
+            }
           }
-        } else {
-          remaining.push(triangle);
         }
       }
-      for (const edge of boundary.values()) {
-        if (edge.count === 1) remaining.push(makeTriangle(edge.a, edge.b, pointIndex, coords));
+      candidates.sort((a, b) => a.distance - b.distance);
+      for (const candidate of candidates.slice(0, 2)) {
+        if (edgeKeys.has(candidate.key)) continue;
+        edgeKeys.add(candidate.key);
+        edges.push({ a: candidate.a, b: candidate.b, constellations: null, alpha: 1, target: 1, d: 0 });
       }
-      triangles = remaining;
     }
-
-    return triangles.filter(([a, b, c]) => a < firstSuper && b < firstSuper && c < firstSuper);
   }
 
-  function makeTriangle(a, b, c, points) {
-    const pa = points[a], pb = points[b], pc = points[c];
-    const area = (pb.x - pa.x) * (pc.y - pa.y) - (pb.y - pa.y) * (pc.x - pa.x);
-    return area >= 0 ? [a, b, c] : [a, c, b];
-  }
-
-  function containsInCircumcircle(triangle, point, points) {
-    const a = points[triangle[0]], b = points[triangle[1]], c = points[triangle[2]];
-    const ax = a.x - point.x, ay = a.y - point.y;
-    const bx = b.x - point.x, by = b.y - point.y;
-    const cx = c.x - point.x, cy = c.y - point.y;
-    const determinant = (ax * ax + ay * ay) * (bx * cy - cx * by)
-      - (bx * bx + by * by) * (ax * cy - cx * ay)
-      + (cx * cx + cy * cy) * (ax * by - bx * ay);
-    return determinant > 0;
-  }
-
-  function build() {
-    const area = w * h;
-    const cap = isTouch || w < 700 ? 140 : 360;
-    const n = Math.max(60, Math.min(cap, Math.round(area / 7000)));
-    base = Math.max(65, Math.min(125, Math.min(w, h) * 0.12));
-    nodes = [];
-    const nc = Math.max(4, Math.round(n / 22));
+  function buildSphere() {
+    const count = 1600;
+    for (const [x, y, z] of [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]]) {
+      addNode(normalize(x, y, z), false);
+    }
     const centers = [];
-    for (let i = 0; i < nc; i++) {
-      const c = { x: Math.random() * w, y: Math.random() * h };
-      centers.push(c);
-      nodes.push(makeNode(c.x, c.y, true));
+    for (let i = 0; i < Math.round(count / 22); i++) {
+      const center = randomDirection();
+      centers.push(center);
+      addNode(center, true);
     }
-    const sigma = Math.min(w, h) * 0.09;
-    while (nodes.length < n) {
-      let x, y;
+    while (nodes.length < count) {
+      let p = randomDirection();
       if (Math.random() < 0.72) {
-        const c = centers[(Math.random() * nc) | 0];
-        x = c.x + gauss() * sigma;
-        y = c.y + gauss() * sigma;
-      } else {
-        x = Math.random() * w;
-        y = Math.random() * h;
+        const center = centers[(Math.random() * centers.length) | 0];
+        p = normalize(center.x + gauss() * 0.13, center.y + gauss() * 0.13, center.z + gauss() * 0.13);
       }
-      x = Math.min(w + 30, Math.max(-30, x));
-      y = Math.min(h + 30, Math.max(-30, y));
-      nodes.push(makeNode(x, y, Math.random() < 0.035));
+      addNode(p, Math.random() < 0.035);
     }
-    edges.clear();
-    pulses.length = 0;
-    adj = nodes.map(() => []);
+
+    // The convex hull of points on a sphere gives a seam-free spherical triangulation.
+    let faces = [makeFace(0, 1, 2), makeFace(0, 3, 1), makeFace(0, 2, 3), makeFace(1, 3, 2)];
+    for (let index = 4; index < nodes.length; index++) {
+      const p = nodes[index], boundary = new Map(), remaining = [];
+      for (const face of faces) {
+        if (face.nx * p.x + face.ny * p.y + face.nz * p.z > face.distance + 1e-12) {
+          for (const [a, b] of [[face.a, face.b], [face.b, face.c], [face.c, face.a]]) {
+            const key = Math.min(a, b) + ':' + Math.max(a, b);
+            if (boundary.has(key)) boundary.delete(key);
+            else boundary.set(key, [a, b]);
+          }
+        } else {
+          remaining.push(face);
+        }
+      }
+      for (const [a, b] of boundary.values()) remaining.push(makeFace(a, b, index));
+      faces = remaining;
+    }
+
+    const seen = new Map();
+    function getEdge(a, b) {
+      const lo = Math.min(a, b), hi = Math.max(a, b);
+      const key = lo + ':' + hi;
+      if (!seen.has(key)) {
+        const edge = { a: lo, b: hi, alpha: 0, target: 0, d: 0, threshold: BASE_DISTANCE };
+        seen.set(key, edge);
+        edges.push(edge);
+      }
+      return seen.get(key);
+    }
+    for (const { a, b, c } of faces) {
+      triangles.push([getEdge(a, b), getEdge(b, c), getEdge(c, a)]);
+    }
   }
 
   function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     w = window.innerWidth;
     h = window.innerHeight;
+    focal = Math.max(1, h / 2);
     canvas.width = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    build();
-    update(0, true);
-    draw();
+    render(0, true);
   }
 
-  // ---- Simulation ----
-  function update(dt, instant) {
-    const R = (isTouch ? 130 : 175) * (1 + pointer.boost * 0.5);
-    const R2 = R * R;
-    const alive = pointer.alive;
-    const n = nodes.length;
-
-    // global parallax: layers shift against the cursor's offset from screen centre
-    const ptx = alive > 0.003 ? (pointer.x / w - 0.5) : 0;
-    const pty = alive > 0.003 ? (pointer.y / h - 0.5) : 0;
-    const pk = Math.min(1, 0.04 * dt);
-    par.x += (ptx - par.x) * pk;
-    par.y += (pty - par.y) * pk;
-    par.swirl += (alive * (0.4 + pointer.boost) - par.swirl) * Math.min(1, 0.05 * dt);
-
-    for (let k = ripples.length - 1; k >= 0; k--) {
-      const rp = ripples[k];
-      rp.r += 5 * dt;
-      rp.s *= Math.pow(0.985, dt);
-      if (rp.s < 0.03) ripples.splice(k, 1);
+  function projectNodes(dt, instant) {
+    for (const p of nodes) {
+      const ox = Math.sin(time * p.sxSpeed + p.px) * p.ax;
+      const oy = Math.cos(time * p.sySpeed + p.py) * p.ay;
+      const v = normalize(
+        p.x + p.tangent.x * ox + p.tangent2.x * oy,
+        p.y + p.tangent.y * ox + p.tangent2.y * oy,
+        p.z + p.tangent.z * ox + p.tangent2.z * oy
+      );
+      p.cx = camera.right.x * v.x + camera.right.y * v.y + camera.right.z * v.z;
+      p.cy = camera.up.x * v.x + camera.up.y * v.y + camera.up.z * v.z;
+      p.cz = camera.forward.x * v.x + camera.forward.y * v.y + camera.forward.z * v.z;
+      p.visible = false;
+      p.raw = 0;
+      if (p.cz < NEAR) continue;
+      p.sx = w / 2 + focal * p.cx / p.cz;
+      p.sy = h / 2 - focal * p.cy / p.cz;
+      let tox = 0, toy = 0;
+      const dx = pointer.x - p.sx, dy = pointer.y - p.sy;
+      const distance = Math.hypot(dx, dy) + 0.001;
+      const radius = pointer.touch ? 130 : 175;
+      if (pointer.active && distance < radius * 2) {
+        p.raw = Math.exp(-(distance * distance) / (radius * radius));
+        if (!instant) {
+          const magnitude = 7 * p.raw * (distance / radius - 0.4) / 0.6;
+          tox += dx / distance * magnitude;
+          toy += dy / distance * magnitude;
+        }
+      }
+      if (pointer.active && !instant) {
+        const swirl = pointer.touch ? 220 : 320;
+        if (distance < swirl * 2.2) {
+          const strength = Math.exp(-(distance * distance) / (swirl * swirl));
+          const angle = strength * (0.5 + 0.35 * Math.sin(distance * 0.025 - time * 2.2));
+          tox += dy * angle * 0.18;
+          toy -= dx * angle * 0.18;
+        }
+      }
+      if (!instant) {
+        for (const ripple of ripples) {
+          const rx = p.sx - ripple.x, ry = p.sy - ripple.y;
+          const rd = Math.hypot(rx, ry) + 0.001;
+          const band = (rd - ripple.r) / 45;
+          if (band > -3 && band < 3) {
+            const magnitude = Math.exp(-band * band) * ripple.alpha * 26;
+            tox += rx / rd * magnitude;
+            toy += ry / rd * magnitude;
+          }
+        }
+        if (sky) { tox *= 0.2; toy *= 0.2; }
+        const easing = Math.min(1, 0.1 * dt);
+        p.ox += (tox - p.ox) * easing;
+        p.oy += (toy - p.oy) * easing;
+      }
+      if (p.ox || p.oy) {
+        const shifted = normalize((p.sx + p.ox - w / 2) / focal, -(p.sy + p.oy - h / 2) / focal, 1);
+        p.cx = shifted.x; p.cy = shifted.y; p.cz = shifted.z;
+        p.sx += p.ox; p.sy += p.oy;
+      }
+      p.visible = p.sx >= -20 && p.sx <= w + 20 && p.sy >= -20 && p.sy <= h + 20;
     }
-    const SW = isTouch ? 220 : 320;
+  }
 
-    for (let i = 0; i < n; i++) {
+  function projectedSegment(a, b) {
+    let x1 = a.cx, y1 = a.cy, z1 = a.cz;
+    let x2 = b.cx, y2 = b.cy, z2 = b.cz;
+    if (z1 < NEAR && z2 < NEAR) return null;
+    if (z1 < NEAR) {
+      const t = (NEAR - z1) / (z2 - z1);
+      x1 += (x2 - x1) * t;
+      y1 += (y2 - y1) * t;
+      z1 = NEAR;
+    } else if (z2 < NEAR) {
+      const t = (NEAR - z2) / (z1 - z2);
+      x2 += (x1 - x2) * t;
+      y2 += (y1 - y2) * t;
+      z2 = NEAR;
+    }
+    x1 = w / 2 + focal * x1 / z1;
+    y1 = h / 2 - focal * y1 / z1;
+    x2 = w / 2 + focal * x2 / z2;
+    y2 = h / 2 - focal * y2 / z2;
+
+    const dx = x2 - x1, dy = y2 - y1;
+    let start = 0, end = 1;
+    for (const [p, q] of [[-dx, x1], [dx, w - x1], [-dy, y1], [dy, h - y1]]) {
+      if (p === 0) {
+        if (q < 0) return null;
+      } else {
+        const t = q / p;
+        if (p < 0) start = Math.max(start, t);
+        else end = Math.min(end, t);
+        if (start > end) return null;
+      }
+    }
+    return [x1 + start * dx, y1 + start * dy, x1 + end * dx, y1 + end * dy];
+  }
+
+  function updateNetwork(dt, instant) {
+    const first = new Float32Array(nodes.length);
+    const second = new Float32Array(nodes.length);
+    const screenBase = Math.max(65, Math.min(125, Math.min(w, h) * 0.12));
+    for (const edge of edges) {
+      const a = nodes[edge.a], b = nodes[edge.b];
+      edge.d = Math.hypot(a.cx - b.cx, a.cy - b.cy, a.cz - b.cz);
+      if (sky) continue;
+      const factor = (a.hub || b.hub ? 1.6 : 1) * Math.min(1.6, 1 + 1.2 * Math.min(a.raw, b.raw));
+      edge.threshold = BASE_DISTANCE * factor;
+      edge.ratio = edge.d / edge.threshold;
+      if (a.cz >= NEAR && b.cz >= NEAR) {
+        edge.ratio = Math.max(edge.ratio, Math.hypot(a.sx - b.sx, a.sy - b.sy) / (screenBase * factor));
+      }
+      edge.target = 0;
+    }
+    for (const triangle of triangles) {
+      if (triangle.every((edge) => edge.ratio < 1)) {
+        for (const edge of triangle) edge.target = 1;
+      }
+    }
+    for (const list of adjacency) list.length = 0;
+    for (const edge of edges) {
+      edge.alpha += (edge.target - edge.alpha) * (instant ? 1 : Math.min(1, 0.05 * dt));
+      if (edge.alpha > 0.25) {
+        adjacency[edge.a].push(edge);
+        adjacency[edge.b].push(edge);
+      }
+    }
+    for (const edge of edges) {
+      if (edge.alpha <= 0.25) continue;
+      first[edge.a] = Math.max(first[edge.a], nodes[edge.b].raw * 0.6);
+      first[edge.b] = Math.max(first[edge.b], nodes[edge.a].raw * 0.6);
+    }
+    for (const edge of edges) {
+      if (edge.alpha <= 0.25) continue;
+      second[edge.a] = Math.max(second[edge.a], first[edge.b] * 0.6);
+      second[edge.b] = Math.max(second[edge.b], first[edge.a] * 0.6);
+    }
+    for (let i = 0; i < nodes.length; i++) {
       const p = nodes[i];
-      p.x = p.hx + Math.sin(time * p.sx + p.px) * p.ax + p.ox - par.x * 70 * p.depth;
-      p.y = p.hy + Math.cos(time * p.sy + p.py) * p.ay + p.oy - par.y * 70 * p.depth;
-
-      let raw = 0, tox = 0, toy = 0;
-
-      // swirl: nodes orbit the cursor with a wave-like phase, falling off with distance
-      if (par.swirl > 0.004) {
-        const sx = p.x - pointer.x, sy = p.y - pointer.y;
-        const sd = Math.sqrt(sx * sx + sy * sy) + 0.001;
-        if (sd < SW * 2.2) {
-          const f = Math.exp(-(sd * sd) / (SW * SW)) * par.swirl;
-          const wave = Math.sin(sd * 0.025 - time * 2.2);
-          const ang = f * (0.5 + 0.35 * wave);
-          tox += (-sy / sd) * sd * ang * 0.18;
-          toy += (sx / sd) * sd * ang * 0.18;
-        }
-      }
-      // ripples: expanding rings push nodes radially
-      for (let k = 0; k < ripples.length; k++) {
-        const rp = ripples[k];
-        const rx = p.x - rp.x, ry = p.y - rp.y;
-        const rd = Math.sqrt(rx * rx + ry * ry) + 0.001;
-        const band = (rd - rp.r) / 45;
-        if (band > -3 && band < 3) {
-          const m = Math.exp(-band * band) * rp.s * 26;
-          tox += (rx / rd) * m;
-          toy += (ry / rd) * m;
-        }
-      }
-      if (alive > 0.003) {
-        const dx = pointer.x - p.x, dy = pointer.y - p.y;
-        const d2 = dx * dx + dy * dy;
-        if (d2 < R2 * 4) {
-          const d = Math.sqrt(d2) + 0.001;
-          raw = Math.exp(-d2 / R2) * alive;
-          // repel up close, mild attraction at mid range
-          const mag = 7 * raw * (d / R - 0.4) / 0.6 * (1 + pointer.boost);
-          tox += (dx / d) * mag;
-          toy += (dy / d) * mag;
-        }
-      }
-      p.raw = raw;
-      const k = Math.min(1, 0.1 * dt);
-      p.ox += (tox - p.ox) * k;
-      p.oy += (toy - p.oy) * k;
-    }
-
-    for (const e of edges.values()) e.target = 0;
-    for (const triangle of triangulate(nodes)) {
-      const pairs = [
-        [triangle[0], triangle[1]],
-        [triangle[1], triangle[2]],
-        [triangle[2], triangle[0]]
-      ];
-      const links = pairs.map(([a, b]) => {
-        const first = nodes[a], second = nodes[b];
-        const d = Math.hypot(first.x - second.x, first.y - second.y);
-        const hubF = (first.hub || second.hub) ? 1.6 : 1;
-        const mouseF = Math.min(1.6, 1 + 1.2 * Math.min(first.raw, second.raw));
-        const thr = base * hubF * mouseF;
-        return { a, b, d, thr, key: Math.min(a, b) * 4096 + Math.max(a, b) };
-      });
-      if (links.some((link) => link.d >= link.thr)) continue;
-
-      for (const link of links) {
-        let e = edges.get(link.key);
-        if (e) {
-          e.target = 1; e.d = link.d; e.thr = link.thr;
-        } else {
-          e = { a: Math.min(link.a, link.b), b: Math.max(link.a, link.b), alpha: instant ? 1 : 0, target: 1, d: link.d, thr: link.thr };
-          edges.set(link.key, e);
-        }
-      }
-    }
-
-    for (let i = 0; i < n; i++) adj[i].length = 0;
-    const fade = Math.min(1, 0.05 * dt);
-    for (const [key, e] of edges) {
-      if (e.target === 0) { edges.delete(key); continue; }
-      e.alpha += (e.target - e.alpha) * fade;
-      if (instant) e.alpha = e.target;
-      if (e.alpha > 0.25) { adj[e.a].push(e); adj[e.b].push(e); }
-    }
-
-    // propagate activation through the network
-    const t1 = new Float32Array(n), t2 = new Float32Array(n);
-    for (let i = 0; i < n; i++) {
-      const list = adj[i];
-      for (let k = 0; k < list.length; k++) {
-        const e = list[k];
-        const v = nodes[e.a === i ? e.b : e.a].raw * 0.6;
-        if (v > t1[i]) t1[i] = v;
-      }
-    }
-    for (let i = 0; i < n; i++) {
-      const list = adj[i];
-      for (let k = 0; k < list.length; k++) {
-        const e = list[k];
-        const v = t1[e.a === i ? e.b : e.a] * 0.6;
-        if (v > t2[i]) t2[i] = v;
-      }
-    }
-    const lerp = Math.min(1, 0.1 * dt);
-    for (let i = 0; i < n; i++) {
-      const p = nodes[i];
-      p.act += (Math.max(p.raw, t1[i], t2[i]) - p.act) * lerp;
+      const target = Math.max(p.raw, first[i], second[i]);
+      p.act += (target - p.act) * (instant ? 1 : Math.min(1, 0.1 * dt));
       p.flash *= Math.pow(0.96, dt);
     }
-
-    if (!instant) updatePulses(dt);
-  }
-
-  function spawnPulse(from, edge, hops, magenta) {
-    if (pulses.length > 90) return;
-    pulses.push({ e: edge, t: 0, dir: edge.a === from ? 1 : -1, hops, speed: 0.012 + Math.random() * 0.012, magenta });
   }
 
   function updatePulses(dt) {
-    const n = nodes.length;
-    if (Math.random() < 0.05 * dt) {
-      const i = (Math.random() * n) | 0;
-      const list = adj[i];
-      if (list.length) spawnPulse(i, list[(Math.random() * list.length) | 0], 2 + ((Math.random() * 3) | 0), Math.random() < 0.12);
+    if (Math.random() < 0.06 * dt && pulses.length < 90) {
+      const from = (Math.random() * nodes.length) | 0;
+      const list = adjacency[from];
+      if (list.length) {
+        const edge = list[(Math.random() * list.length) | 0];
+        pulses.push({ edge, from, t: 0, hops: 2 + ((Math.random() * 3) | 0), magenta: Math.random() < 0.12 });
+      }
     }
-    if (Math.random() < 0.03 * dt) nodes[(Math.random() * n) | 0].flash = 1;
-
-    // pulses launched from the node nearest the cursor
-    if (pointer.alive > 0.2 && Math.random() < (0.15 + pointer.boost * 0.5) * dt) {
-      let best = -1, bd = 1e9;
-      for (let i = 0; i < n; i++) {
+    if (Math.random() < 0.03 * dt) nodes[(Math.random() * nodes.length) | 0].flash = 1;
+    if (pointer.active && Math.random() < 0.15 * dt && pulses.length < 90) {
+      let closest = -1, distance = Infinity;
+      for (let i = 0; i < nodes.length; i++) {
         const p = nodes[i];
-        const d = (p.x - pointer.x) ** 2 + (p.y - pointer.y) ** 2;
-        if (d < bd) { bd = d; best = i; }
+        if (!p.visible || !adjacency[i].length) continue;
+        const d = (p.sx - pointer.x) ** 2 + (p.sy - pointer.y) ** 2;
+        if (d < distance) { closest = i; distance = d; }
       }
-      if (best >= 0 && adj[best].length) {
-        nodes[best].flash = 1;
-        spawnPulse(best, adj[best][(Math.random() * adj[best].length) | 0], 3 + ((Math.random() * 3) | 0), Math.random() < 0.2);
+      if (closest >= 0) {
+        const list = adjacency[closest];
+        nodes[closest].flash = 1;
+        pulses.push({ edge: list[(Math.random() * list.length) | 0], from: closest, t: 0, hops: 3, magenta: Math.random() < 0.2 });
       }
     }
-
-    for (let k = pulses.length - 1; k >= 0; k--) {
-      const p = pulses[k];
-      p.t += p.speed * dt * (90 / Math.max(20, p.e.d)) * 1.4;
-      if (p.t >= 1) {
-        const arrive = p.dir > 0 ? p.e.b : p.e.a;
-        nodes[arrive].flash = 1;
-        const list = adj[arrive];
-        if (p.hops > 0 && list.length > 1) {
-          const next = list[(Math.random() * list.length) | 0];
-          if (next !== p.e) {
-            p.e = next; p.t = 0; p.dir = next.a === arrive ? 1 : -1; p.hops--;
-            continue;
-          }
-        }
-        pulses.splice(k, 1);
+    for (let i = pulses.length - 1; i >= 0; i--) {
+      const pulse = pulses[i];
+      if (pulse.edge.alpha <= 0.25) {
+        pulses.splice(i, 1);
+        continue;
       }
+      pulse.t += 0.018 * dt * Math.min(3, BASE_DISTANCE / Math.max(0.03, pulse.edge.d));
+      if (pulse.t < 1) continue;
+      const arrival = pulse.edge.a === pulse.from ? pulse.edge.b : pulse.edge.a;
+      nodes[arrival].flash = 1;
+      const choices = adjacency[arrival].filter((edge) => edge !== pulse.edge);
+      if (pulse.hops > 0 && choices.length) {
+        pulse.from = arrival;
+        pulse.edge = choices[(Math.random() * choices.length) | 0];
+        pulse.t = 0;
+        pulse.hops--;
+      } else {
+        pulses.splice(i, 1);
+      }
+    }
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      ripples[i].r += 5 * dt;
+      ripples[i].alpha *= Math.pow(0.96, dt);
+      if (ripples[i].alpha < 0.02) ripples.splice(i, 1);
     }
   }
 
-  // ---- Rendering ----
-  function line(x1, y1, x2, y2, rgb, a, lw) {
-    ctx.strokeStyle = 'rgba(' + rgb + ',' + a.toFixed(3) + ')';
-    ctx.lineWidth = lw;
+  function line(x1, y1, x2, y2, rgb, alpha, width) {
+    ctx.strokeStyle = 'rgba(' + rgb + ',' + alpha.toFixed(3) + ')';
+    ctx.lineWidth = width;
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
   }
 
-  function dot(x, y, r, rgb, a) {
-    ctx.fillStyle = 'rgba(' + rgb + ',' + a.toFixed(3) + ')';
+  function dot(x, y, radius, rgb, alpha) {
+    ctx.fillStyle = 'rgba(' + rgb + ',' + alpha.toFixed(3) + ')';
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, 6.2832);
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  function pointOnEdge(a, b, t) {
+    return { cx: a.cx + (b.cx - a.cx) * t, cy: a.cy + (b.cy - a.cy) * t, cz: a.cz + (b.cz - a.cz) * t };
   }
 
   function draw() {
@@ -353,127 +447,243 @@
     ctx.globalCompositeOperation = 'lighter';
     ctx.lineCap = 'round';
 
-    // connections: violet / pale / cyan layers with a slight chromatic offset
-    for (const e of edges.values()) {
-      const a = nodes[e.a], b = nodes[e.b];
-      const closeness = Math.max(0, 1 - e.d / (e.thr * 1.12));
+    for (const edge of edges) {
+      if (edge.alpha < 0.008) continue;
+      const a = nodes[edge.a], b = nodes[edge.b];
+      const segment = projectedSegment(a, b);
+      if (!segment) continue;
+      const [x1, y1, x2, y2] = segment;
       const act = (a.act + b.act) * 0.5;
-      const alpha = e.alpha * ((0.07 + 0.3 * Math.sqrt(closeness)) * (0.55 + a.op * 0.25 + b.op * 0.2) + act * 0.65);
-      if (alpha < 0.008) continue;
-      const lw = 0.6 + act * 0.5;
-      line(a.x - 1.1, a.y, b.x - 1.1, b.y, VIOLET, alpha, lw);
-      line(a.x + 1.1, a.y, b.x + 1.1, b.y, CYAN, alpha, lw);
-      line(a.x, a.y, b.x, b.y, PALE, alpha * 0.8, lw * 0.8);
-    }
-
-    // temporary links from the cursor to the nearest nodes
-    if (pointer.alive > 0.01) {
-      const near = [];
-      for (let i = 0; i < nodes.length; i++) {
-        const p = nodes[i];
-        const d2 = (p.x - pointer.x) ** 2 + (p.y - pointer.y) ** 2;
-        if (d2 < 200 * 200) near.push([d2, i]);
+      if (sky) {
+        line(x1, y1, x2, y2, CYAN, edge.constellations ? 0.5 : 0.1, 0.8 + act * 0.5);
+        continue;
       }
-      near.sort((x, y) => x[0] - y[0]);
-      for (let k = 0; k < Math.min(4, near.length); k++) {
-        const p = nodes[near[k][1]];
-        const f = Math.exp(-near[k][0] / (150 * 150)) * pointer.alive;
-        line(pointer.x, pointer.y, p.x, p.y, k === 0 ? MAGENTA : CYAN, f * 0.45, 0.6);
+      const closeness = Math.max(0, 1 - edge.ratio / 1.12);
+      const alpha = Math.min(1, edge.alpha * ((0.07 + 0.3 * Math.sqrt(closeness))
+        * (0.55 + a.op * 0.25 + b.op * 0.2) + act * 0.65));
+      const width = 0.6 + act * 0.5;
+      line(x1 - 1.1, y1, x2 - 1.1, y2, VIOLET, alpha, width);
+      line(x1 + 1.1, y1, x2 + 1.1, y2, CYAN, alpha, width);
+      line(x1, y1, x2, y2, PALE, alpha * 0.8, width * 0.8);
+    }
+
+    for (const pulse of pulses) {
+      const a = nodes[pulse.from];
+      const b = nodes[pulse.edge.a === pulse.from ? pulse.edge.b : pulse.edge.a];
+      const head = pointOnEdge(a, b, pulse.t);
+      const tail = pointOnEdge(a, b, Math.max(0, pulse.t - 0.12));
+      const segment = projectedSegment(tail, head);
+      if (!segment || head.cz < NEAR) continue;
+      const env = Math.sin(Math.PI * pulse.t);
+      const faint = sky && !pulse.edge.constellations;
+      line(...segment, pulse.magenta ? MAGENTA : CYAN, Math.min(faint ? 0.3 : 1, 0.55 * env), 1.3);
+      const x = w / 2 + focal * head.cx / head.cz;
+      const y = h / 2 - focal * head.cy / head.cz;
+      if (x >= 0 && x <= w && y >= 0 && y <= h) {
+        dot(x, y, 1.8, pulse.magenta ? MAGENTA : PALE, Math.min(faint ? 0.3 : 1, 0.95 * env));
       }
     }
 
-    for (const p of pulses) {
-      const a = nodes[p.e.a], b = nodes[p.e.b];
-      const t = p.dir > 0 ? p.t : 1 - p.t;
-      const t0 = p.dir > 0 ? Math.max(0, t - 0.12) : Math.min(1, t + 0.12);
-      const x = a.x + (b.x - a.x) * t, y = a.y + (b.y - a.y) * t;
-      const x0 = a.x + (b.x - a.x) * t0, y0 = a.y + (b.y - a.y) * t0;
-      const env = Math.sin(Math.PI * p.t);
-      line(x0, y0, x, y, p.magenta ? MAGENTA : CYAN, 0.55 * env, 1.3);
-      dot(x, y, 1.8, p.magenta ? MAGENTA : PALE, 0.95 * env);
-    }
-
-    // nodes: violet | pale | cyan triplets
-    for (let i = 0; i < nodes.length; i++) {
-      const p = nodes[i];
+    for (const p of nodes) {
+      if (!p.visible) continue;
       const lit = Math.max(p.act, p.flash);
-      const a = Math.min(1, p.op * (0.45 + 0.55 * lit));
-      const r = p.r * (1 + lit * 0.25);
-      const off = r * 1.25;
-      if (lit > 0.25 || p.hub) dot(p.x, p.y, r * (3 + lit * 2), p.tint ? MAGENTA : CYAN, 0.05 + lit * 0.09);
-      dot(p.x - off, p.y, r, p.tint ? MAGENTA : VIOLET, a);
-      dot(p.x + off, p.y, r, CYAN, a);
-      dot(p.x, p.y, r * 0.95, PALE, Math.min(1, a + 0.1));
+      const alpha = Math.min(1, p.op * (0.45 + 0.55 * lit));
+      const radius = p.r * (1 + lit * 0.25);
+      if (sky && !p.hub) {
+        dot(p.sx, p.sy, radius, CYAN, Math.min(0.3, alpha));
+        continue;
+      }
+      const offset = radius * 1.25;
+      if (lit > 0.25 || p.hub) dot(p.sx, p.sy, radius * (3 + lit * 2), p.tint ? MAGENTA : CYAN, 0.05 + lit * 0.09);
+      dot(p.sx - offset, p.sy, radius, p.tint ? MAGENTA : VIOLET, alpha);
+      dot(p.sx + offset, p.sy, radius, CYAN, alpha);
+      dot(p.sx, p.sy, radius * 0.95, PALE, Math.min(1, alpha + 0.1));
     }
-    if (pointer.alive > 0.01) {
-      dot(pointer.x, pointer.y, 9, CYAN, 0.12 * pointer.alive);
-      ctx.strokeStyle = 'rgba(' + PALE + ',' + (0.75 * pointer.alive).toFixed(3) + ')';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(pointer.x, pointer.y, 7, 0, 6.2832);
-      ctx.stroke();
-      dot(pointer.x, pointer.y, 2.2, PALE, pointer.alive);
+
+    if (pointer.active) {
+      const near = nodes.filter((p) => p.visible)
+        .map((p) => ({ p, d2: (p.sx - pointer.x) ** 2 + (p.sy - pointer.y) ** 2 }))
+        .filter((entry) => entry.d2 < 200 * 200)
+        .sort((a, b) => a.d2 - b.d2);
+      for (let i = 0; i < Math.min(4, near.length); i++) {
+        const entry = near[i];
+        const alpha = Math.exp(-entry.d2 / (150 * 150)) * 0.45;
+        line(pointer.x, pointer.y, entry.p.sx, entry.p.sy, i === 0 ? MAGENTA : CYAN,
+          sky && !entry.p.hub ? Math.min(0.3, alpha) : alpha, 0.6);
+      }
     }
     ctx.globalCompositeOperation = 'source-over';
   }
 
-  function frame(now) {
-    rafId = requestAnimationFrame(frame);
-    let dt = (now - last) / 16.667;
-    last = now;
-    if (!(dt > 0)) dt = 1;
-    dt = Math.min(dt, 3);
-    time += 0.016 * dt;
-
-    const sp = Math.hypot(pointer.x - pointer.px, pointer.y - pointer.py) / dt;
-    pointer.px = pointer.x; pointer.py = pointer.y;
-    pointer.boost += (Math.min(1, sp / 25) - pointer.boost) * 0.1;
-    // emit a ripple each time the cursor travels far enough
-    if (pointer.active && Math.hypot(pointer.x - lastRipple.x, pointer.y - lastRipple.y) > 140) {
-      addRipple(pointer.x, pointer.y, 0.5 + pointer.boost * 0.5);
-      lastRipple = { x: pointer.x, y: pointer.y };
-    }
-    const target = pointer.active ? 1 : 0;
-    pointer.alive += (target - pointer.alive) * Math.min(1, (target ? 0.15 : 0.04) * dt);
-    if (pointer.alive < 0.003 && !pointer.active) pointer.alive = 0;
-
-    update(dt, false);
+  function render(dt, instant) {
+    projectNodes(dt, instant);
+    updateNetwork(dt, instant);
+    if (!instant) updatePulses(dt);
     draw();
+  }
+
+  function frame(now) {
+    const dt = Math.min((now - last) / 16.667 || 1, 3);
+    last = now;
+    time += 0.016 * dt;
+    render(dt, false);
+    rafId = requestAnimationFrame(frame);
   }
 
   function start() {
     cancelAnimationFrame(rafId);
-    if (reduceMotion.matches) { update(0, true); draw(); return; }
+    rafId = 0;
+    if (document.hidden) return;
+    if (reduceMotion.matches) {
+      pulses.length = 0;
+      ripples.length = 0;
+      for (const node of nodes) {
+        node.flash = 0;
+        node.ox = 0;
+        node.oy = 0;
+      }
+      render(0, true);
+      return;
+    }
     last = performance.now();
     rafId = requestAnimationFrame(frame);
   }
 
-  // ---- Input ----
-  function setPos(e) {
-    pointer.x = e.clientX; pointer.y = e.clientY;
-    if (!pointer.active) { pointer.px = pointer.x; pointer.py = pointer.y; }
-    pointer.active = true;
+  function redrawIfStill() {
+    if (reduceMotion.matches && !document.hidden) render(0, true);
   }
-  window.addEventListener('pointermove', (e) => { isTouch = e.pointerType === 'touch'; setPos(e); }, { passive: true });
-  window.addEventListener('pointerdown', (e) => {
-    isTouch = e.pointerType === 'touch';
-    setPos(e);
-    pointer.boost = 1;
-    addRipple(e.clientX, e.clientY, 1);
-    lastRipple = { x: e.clientX, y: e.clientY };
-  }, { passive: true });
-  const release = (e) => { if (e.pointerType === 'touch') pointer.active = false; };
-  window.addEventListener('pointerup', release, { passive: true });
-  window.addEventListener('pointercancel', release, { passive: true });
-  document.addEventListener('mouseleave', () => { pointer.active = false; });
 
-  let rt = 0;
-  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { resize(); start(); }, 120); });
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) cancelAnimationFrame(rafId); else start();
+  function constellationAt(x, y) {
+    let closest = null, bestDistance = 14 * 14;
+    for (const edge of edges) {
+      if (!edge.constellations) continue;
+      const segment = projectedSegment(nodes[edge.a], nodes[edge.b]);
+      if (!segment) continue;
+      const [x1, y1, x2, y2] = segment;
+      const dx = x2 - x1, dy = y2 - y1;
+      const lengthSquared = dx * dx + dy * dy;
+      const t = lengthSquared ? Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / lengthSquared)) : 0;
+      const distance = (x - x1 - t * dx) ** 2 + (y - y1 - t * dy) ** 2;
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        closest = edge.constellations[0];
+      }
+    }
+    return closest;
+  }
+
+  function updateConstellationInfo() {
+    const index = hoveredConstellation === null ? selectedConstellation : hoveredConstellation;
+    constellationInfo.hidden = index === null;
+    constellationInfo.textContent = index === null ? '' : sky.labels[index][0];
+  }
+
+  function rotate(dx, dy) {
+    const yaw = -dx / focal, pitch = dy / focal;
+    const cy = Math.cos(yaw), sy = Math.sin(yaw);
+    const cp = Math.cos(pitch), sp = Math.sin(pitch);
+    const right = camera.right, up = camera.up, forward = camera.forward;
+    const turnedForward = {
+      x: forward.x * cy + right.x * sy,
+      y: forward.y * cy + right.y * sy,
+      z: forward.z * cy + right.z * sy
+    };
+    camera.right = normalize(right.x * cy - forward.x * sy, right.y * cy - forward.y * sy, right.z * cy - forward.z * sy);
+    camera.forward = normalize(turnedForward.x * cp + up.x * sp, turnedForward.y * cp + up.y * sp, turnedForward.z * cp + up.z * sp);
+    camera.up = normalize(
+      camera.forward.y * camera.right.z - camera.forward.z * camera.right.y,
+      camera.forward.z * camera.right.x - camera.forward.x * camera.right.z,
+      camera.forward.x * camera.right.y - camera.forward.y * camera.right.x
+    );
+  }
+
+  canvas.addEventListener('pointerdown', (event) => {
+    if (drag || (event.pointerType === 'mouse' && event.button !== 0)) return;
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, startX: event.clientX, startY: event.clientY, moved: false };
+    if (sky) {
+      hoveredConstellation = null;
+      updateConstellationInfo();
+    }
+    pointer.x = event.clientX;
+    pointer.y = event.clientY;
+    pointer.active = true;
+    pointer.touch = event.pointerType === 'touch';
+    canvas.setPointerCapture(event.pointerId);
+    canvas.classList.add('dragging');
+    if (!reduceMotion.matches && ripples.length < 6) ripples.push({ x: pointer.x, y: pointer.y, r: 0, alpha: 1 });
+    lastRipple = { x: pointer.x, y: pointer.y };
+    redrawIfStill();
   });
+  canvas.addEventListener('pointermove', (event) => {
+    if (drag && event.pointerId !== drag.id) return;
+    if (drag) {
+      if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 8) drag.moved = true;
+      rotate(event.clientX - drag.x, event.clientY - drag.y);
+      drag.x = event.clientX;
+      drag.y = event.clientY;
+    } else if (event.pointerType !== 'mouse') {
+      return;
+    }
+    if (sky && !drag) {
+      hoveredConstellation = constellationAt(event.clientX, event.clientY);
+      updateConstellationInfo();
+    }
+    pointer.x = event.clientX;
+    pointer.y = event.clientY;
+    pointer.active = true;
+    pointer.touch = event.pointerType === 'touch';
+    if (!reduceMotion.matches && ripples.length < 6 && Math.hypot(pointer.x - lastRipple.x, pointer.y - lastRipple.y) > 140) {
+      ripples.push({ x: pointer.x, y: pointer.y, r: 0, alpha: 0.5 });
+      lastRipple = { x: pointer.x, y: pointer.y };
+    }
+    redrawIfStill();
+  });
+  function endDrag(event) {
+    if (!drag || event.pointerId !== drag.id) return;
+    if (sky && event.type === 'pointerup' && !drag.moved
+      && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) <= 8) {
+      selectedConstellation = constellationAt(event.clientX, event.clientY);
+    }
+    drag = null;
+    canvas.classList.remove('dragging');
+    if (event.pointerType !== 'mouse' || event.type !== 'pointerup'
+      || event.clientX < 0 || event.clientX > w || event.clientY < 0 || event.clientY > h) pointer.active = false;
+    if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+    if (sky) {
+      hoveredConstellation = event.pointerType === 'mouse' && pointer.active
+        ? constellationAt(event.clientX, event.clientY) : null;
+      updateConstellationInfo();
+    }
+    redrawIfStill();
+  }
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+  canvas.addEventListener('lostpointercapture', endDrag);
+  canvas.addEventListener('pointerleave', () => {
+    if (!drag) {
+      pointer.active = false;
+      if (sky) {
+        hoveredConstellation = null;
+        updateConstellationInfo();
+      }
+      redrawIfStill();
+    }
+  });
+  canvas.addEventListener('keydown', (event) => {
+    const step = focal * 0.12;
+    if (event.key === 'ArrowLeft') rotate(step, 0);
+    else if (event.key === 'ArrowRight') rotate(-step, 0);
+    else if (event.key === 'ArrowUp') rotate(0, step);
+    else if (event.key === 'ArrowDown') rotate(0, -step);
+    else return;
+    event.preventDefault();
+    redrawIfStill();
+  });
+  window.addEventListener('resize', resize);
+  document.addEventListener('visibilitychange', start);
   reduceMotion.addEventListener('change', start);
 
+  if (sky) buildConstellationSky(); else buildSphere();
   resize();
   start();
 })();
