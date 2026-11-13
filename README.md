@@ -20,7 +20,7 @@ Financial App content and its Live Demo link are configured in `portfolio_projec
 
 Text selection is disabled in the interactive portfolio example, including its games section. This is a presentation choice, not protection against copying.
 
-The social profile list in both portfolio HTML files links to GitHub and itch.io. LinkedIn, ArtStation, and Instagram currently use non-interactive spans; replace those with links in both files to enable them.
+The social profile list in both portfolio HTML files links to GitHub, itch.io, and INPRNT. LinkedIn and Instagram currently use non-interactive spans; replace those with links in both files to enable them.
 
 Open `main_music.html` over HTTPS or localhost in a browser that supports screen sharing with audio. Select **Share audio**, choose a tab or screen, and enable audio sharing in the browser's picker. The available tab and system-audio options depend on the browser and operating system; some sources may not offer audio. Audio is analyzed locally and is not played back by the page. Use **Stop sharing** or the browser's sharing controls to end capture. If reduced motion is enabled, the network remains still.
 
