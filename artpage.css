@@ -236,6 +236,12 @@ body.is-grid-view .wall-controls {
   -webkit-tap-highlight-color: transparent;
 }
 
+@media (min-width: 601px) {
+  .wall-set .art-card.is-landscape {
+    width: calc(var(--slot-size) * 1.41);
+  }
+}
+
 .wall-set .art-card::before,
 .wall-set .art-card::after {
   position: absolute;

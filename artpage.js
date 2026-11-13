@@ -32,6 +32,9 @@ function startGallery(artworks) {
   depthTrack.setAttribute("aria-hidden", "true");
   atmosphere.append(depthTrack);
   const wallSets = [];
+  const depthSets = [];
+  const landscapeByArtwork = new Array(artworks.length).fill(null);
+  let knownOrientationCount = 0;
   const interfaceLayer = document.querySelector(".interface");
   const imageDialog = document.getElementById("imageDialog");
   const modalImage = document.getElementById("modalImage");
@@ -59,6 +62,20 @@ function startGallery(artworks) {
   const depthTops = [18, 82, 25, 76, 43, 62];
   const depthOffsets = [-42, 48, -54, 38, 56, -34];
   const depthScales = [0.82, 1, 0.76, 0.92, 0.86, 1.04];
+
+  function registerArtworkOrientation(index, isLandscape) {
+    if (landscapeByArtwork[index] !== null) {
+      return;
+    }
+    landscapeByArtwork[index] = isLandscape;
+    knownOrientationCount += 1;
+    wallSets.forEach((set) => {
+      set.children[index].classList.toggle("is-landscape", isLandscape);
+    });
+    if (knownOrientationCount === artworks.length) {
+      layoutWall();
+    }
+  }
 
   function createArtworkCard(artwork, index, setIndex, isGridCard = false) {
     const positions = [
@@ -89,11 +106,21 @@ function startGallery(artworks) {
     });
 
     const image = document.createElement("img");
-    image.src = artwork.thumb;
     image.alt = "";
     image.loading = "eager";
     image.decoding = "async";
     image.draggable = false;
+    image.addEventListener("load", () => {
+      if (!isGridCard) {
+        registerArtworkOrientation(index, image.naturalWidth > image.naturalHeight);
+      }
+    }, { once: true });
+    image.addEventListener("error", () => {
+      if (!isGridCard) {
+        registerArtworkOrientation(index, false);
+      }
+    }, { once: true });
+    image.src = artwork.thumb;
     card.append(image);
     card.addEventListener("click", (event) => {
       if (performance.now() < suppressClickUntil) {
@@ -140,7 +167,64 @@ function startGallery(artworks) {
         depthSet.append(depthImage);
       });
       depthTrack.append(depthSet);
+      depthSets.push(depthSet);
     }
+  }
+
+  function layoutWall() {
+    if (!window.matchMedia("(min-width: 601px)").matches) {
+      wallSets.forEach((set) => {
+        set.style.width = "";
+        Array.from(set.children).forEach((card) => {
+          card.style.left = "";
+        });
+      });
+      depthSets.forEach((set) => {
+        set.style.width = "";
+        Array.from(set.children).forEach((image) => {
+          image.style.left = "";
+        });
+      });
+      measureWall();
+      return;
+    }
+
+    const previousCycleWidth = cycleWidth;
+    const previousSetStart = wallSets[1].offsetLeft;
+    const previousProgress = previousCycleWidth
+      ? ((wallViewport.scrollLeft - previousSetStart) % previousCycleWidth + previousCycleWidth) % previousCycleWidth
+      : 0;
+    const firstCard = wallSets[0].children[0];
+    const firstCardWidth = parseFloat(window.getComputedStyle(firstCard).width);
+    const slotSize = firstCardWidth / (landscapeByArtwork[0] ? 1.41 : 0.94);
+    const gap = slotSize * 0.06;
+    let nextCardLeft = 0;
+
+    artworks.forEach((_, index) => {
+      const cardWidth = wallSets[0].children[index].getBoundingClientRect().width;
+      const center = nextCardLeft + cardWidth / 2;
+      wallSets.forEach((set) => {
+        set.children[index].style.left = `${center}px`;
+      });
+      depthSets.forEach((set) => {
+        set.children[index].style.left = `${center + depthOffsets[index % depthOffsets.length]}px`;
+      });
+      nextCardLeft += cardWidth + gap;
+    });
+
+    wallSets.forEach((set) => {
+      set.style.width = `${nextCardLeft}px`;
+    });
+    depthSets.forEach((set) => {
+      set.style.width = `${nextCardLeft}px`;
+    });
+
+    cycleWidth = wallSets[1].offsetLeft - wallSets[0].offsetLeft;
+    wallViewport.scrollLeft = wallSets[1].offsetLeft +
+      (previousCycleWidth ? previousProgress / previousCycleWidth * cycleWidth : 0);
+    lastWallScroll = wallViewport.scrollLeft;
+    depthScroll = previousCycleWidth ? depthScroll / previousCycleWidth * cycleWidth : 0;
+    depthTrack.style.transform = `translate3d(${-depthScroll}px, 0, 0)`;
   }
 
   function measureWall() {
@@ -395,7 +479,7 @@ function startGallery(artworks) {
     }
   });
 
-  window.addEventListener("resize", measureWall);
+  window.addEventListener("resize", layoutWall);
   window.addEventListener("resize", updateGridHintVisibility);
   measureWall();
   updateGridHintVisibility();
