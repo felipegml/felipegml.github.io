@@ -110,7 +110,8 @@
     }
     for (let i = 0; i < sky.stars.length; i++) {
       const [ra, dec, magnitude] = sky.stars[i];
-      addNode(celestialDirection(ra, dec), connected.has(i), magnitude);
+      const direction = connected.has(i) ? celestialDirection(ra, dec) : randomDirection();
+      addNode(direction, connected.has(i), magnitude);
     }
     for (const [a, b, constellations] of sky.lines) {
       edges.push({ a, b, constellations, alpha: 1, target: 1, d: 0 });
