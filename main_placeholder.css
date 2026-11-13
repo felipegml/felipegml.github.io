@@ -203,9 +203,18 @@ a.social-link:focus-visible { outline: 2px solid #ffad63; outline-offset: 4px; }
 
 .child-branch {
   display: grid;
+  position: relative;
   grid-template-rows: 1fr;
   opacity: 1;
   transition: grid-template-rows 300ms ease, opacity 300ms ease;
+}
+.child-branch::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 24px;
+  border-left: 1px solid #625344;
+  content: "";
 }
 .node-toggle[aria-expanded="false"] + .child-branch {
   grid-template-rows: 0fr;
