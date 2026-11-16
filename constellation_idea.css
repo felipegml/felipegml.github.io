@@ -1,0 +1,55 @@
+.idea-scroll {
+  overflow-x: auto;
+  margin-top: clamp(48px, 8vh, 90px);
+  padding: 4px 4px 16px;
+}
+
+.idea-scroll:focus-visible, .idea-image-link:focus-visible {
+  outline: 2px solid #ffad63;
+  outline-offset: 3px;
+}
+
+.idea-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(240px, 1fr));
+  gap: clamp(20px, 2vw, 36px);
+}
+
+.idea-card h2 {
+  margin: 0 0 14px;
+  color: #eeeae6;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.idea-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid #4d443d;
+}
+
+.idea-image-link {
+  display: block;
+}
+
+.idea-image-link:hover img, .idea-image-link:focus-visible img {
+  border-color: #f07813;
+}
+
+.idea-card p {
+  margin: 16px 0 0;
+  color: #c0bab4;
+  line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+  .idea-grid {
+    grid-template-columns: repeat(3, minmax(240px, 75vw));
+  }
+
+  @media (max-width: 600px) {
+    .idea-scroll { margin-top: 32px; }
+  }
+}

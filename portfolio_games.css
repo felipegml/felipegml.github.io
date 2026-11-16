@@ -86,6 +86,7 @@
   margin-top: clamp(48px, 8vh, 90px);
   align-items: start;
 }
+.project-layout[hidden] { display: none; }
 .project-copy .intro-description { margin-top: 0; white-space: pre-line; }
 .project-copy .intro-description > p { margin: 0 0 1em; }
 .project-copy .intro-description > p:last-child { margin-bottom: 0; }

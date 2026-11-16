@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Constellation sphere</title>
+  <link rel="stylesheet" href="main_placeholder_connect.css">
+</head>
+<body class="sky-with-credits" data-sky="constellations">
+  <canvas id="field" tabindex="0" role="application" aria-label="Interactive constellation sphere" aria-describedby="sphere-hint"></canvas>
+  <a class="sky-home" href="index.html#constellation-idea" aria-label="Back to Constellation Idea"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5M5.5 9.5V21h13V9.5M9.5 21v-7h5v7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/></svg></a>
+  <button id="sky-sound-toggle" type="button" aria-label="Mute sound" aria-pressed="true" title="Mute sound">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12-1a6 6 0 0 1 0 8m2-11a10 10 0 0 1 0 14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/><path id="sky-sound-off" d="M4 4l16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7" hidden/></svg>
+  </button>
+  <button id="sky-credits-toggle" type="button" aria-label="Information" title="Information">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 11v5m0-8h.01" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg>
+  </button>
+  <p id="constellation-info" role="status" aria-live="polite"></p>
+  <button id="constellation-list-toggle" class="sky-icon-button" type="button" aria-label="Constellations" title="Constellations" aria-expanded="false" aria-controls="constellation-list-panel">
+    <svg width="0" height="0" aria-hidden="true"><filter id="constellation-icon-color" color-interpolation-filters="sRGB"><feFlood flood-color="currentColor" result="color"/><feComposite in="color" in2="SourceGraphic" operator="in"/></filter></svg>
+    <img class="constellation-list-icon" src="assets/apps/prototype/icons8-constellation-96.png" alt="">
+  </button>
+  <section id="constellation-list-panel" class="sky-panel" aria-label="Constellations" aria-hidden="true" inert>
+    <div class="sky-panel-heading">
+      <div><p class="sky-eyebrow">Explore the sky</p><h2>Constellations</h2></div>
+      <button class="sky-close" id="constellation-list-close" type="button" aria-label="Close constellation list">&times;</button>
+    </div>
+    <p class="sky-panel-note">Choose a figure to look towards it.</p>
+    <div id="constellation-list"></div>
+  </section>
+  <section id="constellation-details" class="sky-panel" aria-labelledby="constellation-details-name" aria-hidden="true" inert>
+    <div class="sky-panel-heading">
+      <div><p class="sky-eyebrow">Constellation</p><h2 id="constellation-details-name"></h2></div>
+      <button class="sky-close" id="constellation-details-close" type="button" aria-label="Close constellation details">&times;</button>
+    </div>
+    <dl id="constellation-details-facts"></dl>
+  </section>
+  <dialog id="sky-credits" aria-labelledby="sky-credits-title">
+    <div class="sky-panel-heading">
+      <div><p class="sky-eyebrow">About</p><h2 id="sky-credits-title">Information</h2></div>
+      <button class="sky-close" id="sky-credits-close" type="button" aria-label="Close information">&times;</button>
+    </div>
+    <p><strong>Note:</strong> This is an experimental interactive app. Its information may be inaccurate or misleading and should not be used for study. Verify information with reliable sources.</p>
+    <p class="sky-eyebrow">Music</p>
+    <p>Music by <a href="https://pixabay.com/users/sub_clair-55456531/" target="_blank" rel="noopener noreferrer">Sub_Clair</a></p>
+    <p><a href="https://pixabay.com/music/ambient-space-music-631753/" target="_blank" rel="noopener noreferrer">Space Music</a></p>
+  </dialog>
+  <p id="sphere-hint">Drag or swipe to look around. <span class="sky-hover-hint">Hover or tap</span><span class="sky-touch-hint">Tap</span> a constellation to identify it.</p>
+  <p id="sky-sound-status" role="status" hidden></p>
+  <p id="sky-error" role="alert" hidden>Unable to load the constellation data.</p>
+  <audio id="sky-music" src="assets/sound/sub_clair-space-music-631753.mp3" preload="metadata" loop></audio>
+  <audio id="sky-click" src="assets/sound/Digital%20Click%2003.wav" preload="auto"></audio>
+  <script src="constellation_data.js"></script>
+  <script src="constellation_facts.js"></script>
+  <script src="constellation_distances.js"></script>
+  <script src="main_placeholder_connect.js"></script>
+  <script src="constellation_audio.js"></script>
+</body>
+</html>

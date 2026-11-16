@@ -76,15 +76,14 @@ canvas:focus-visible {
   transition: opacity 220ms ease, transform 220ms ease, visibility 0s;
 }
 
-#constellation-list-toggle, .sky-close, #constellation-list button {
+#constellation-list-toggle, #sky-sound-toggle, #sky-credits-toggle, .sky-close, #constellation-list button {
   font: inherit;
   cursor: pointer;
 }
 
-#constellation-list-toggle {
+#constellation-list-toggle, .sky-home, #sky-sound-toggle, #sky-credits-toggle {
   position: fixed;
   top: max(1rem, env(safe-area-inset-top));
-  right: max(1rem, env(safe-area-inset-right));
   min-height: 44px;
   padding: 0.7rem 0.9rem;
   border: 1px solid rgba(0, 229, 255, 0.35);
@@ -96,7 +95,58 @@ canvas:focus-visible {
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
+#constellation-list-toggle {
+  right: max(1rem, env(safe-area-inset-right));
+}
+
+#constellation-list-toggle.sky-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+}
+
+.constellation-list-icon {
+  display: block;
+  width: 26px;
+  height: 26px;
+  filter: url(#constellation-icon-color);
+}
+
+.sky-home, #sky-sound-toggle, #sky-credits-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  text-decoration: none;
+}
+
+.sky-home { left: max(1rem, env(safe-area-inset-left)); }
+#sky-sound-toggle { left: calc(max(1rem, env(safe-area-inset-left)) + 56px); }
+#sky-credits-toggle { left: calc(max(1rem, env(safe-area-inset-left)) + 112px); }
+#sky-sound-off[hidden] { display: none; }
+
+#sky-sound-status {
+  position: fixed;
+  right: 1rem;
+  bottom: 3rem;
+  left: 1rem;
+  margin: 0;
+  color: #e1faff;
+  font: 0.75rem/1.4 sans-serif;
+  text-align: center;
+  pointer-events: none;
+}
+
 #constellation-list-toggle:hover, #constellation-list-toggle:focus-visible,
+.sky-home:hover, .sky-home:focus-visible, #sky-sound-toggle:hover, #sky-sound-toggle:focus-visible,
+#sky-credits-toggle:hover, #sky-credits-toggle:focus-visible,
 .sky-close:hover, .sky-close:focus-visible, #constellation-list button:hover,
 #constellation-list button:focus-visible {
   border-color: #00e5ff;
@@ -177,6 +227,25 @@ canvas:focus-visible {
   line-height: 1;
 }
 
+#sky-credits {
+  box-sizing: border-box;
+  width: min(21rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  padding: 1rem;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  background: #050810;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.12), 0 14px 36px rgba(0, 0, 0, 0.55);
+  color: #e1faff;
+  font: 0.85rem/1.5 "Trebuchet MS", Arial, sans-serif;
+}
+
+#sky-credits::backdrop { background: rgba(0, 0, 0, 0.72); }
+#sky-credits h2 { margin: 0; font-size: 1.15rem; line-height: 1.2; }
+#sky-credits a { color: #00e5ff; }
+#sky-credits a:focus-visible { outline: 2px solid #00e5ff; outline-offset: 3px; }
+
 .sky-panel-note {
   margin: 0.8rem 0;
   color: #b6c4d6;
@@ -237,7 +306,14 @@ canvas:focus-visible {
   }
 }
 
+@media (max-width: 600px) {
+  .sky-with-credits #constellation-info {
+    top: calc(max(1rem, env(safe-area-inset-top)) + 3.4rem);
+    max-width: calc(100% - 2rem);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  #constellation-info, #constellation-info.is-visible, #constellation-list-toggle,
+  #constellation-info, #constellation-info.is-visible, #constellation-list-toggle, .sky-home, #sky-sound-toggle, #sky-credits-toggle,
   .sky-panel, .sky-panel.is-open { transition: none; }
 }

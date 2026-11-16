@@ -1,6 +1,4 @@
 (() => {
-  const toggle = document.querySelector('.node-toggle');
-  const children = document.getElementById('project-nodes');
   const home = document.querySelector('.portfolio-content');
   const sectionView = document.getElementById('section-view');
   const sectionName = document.getElementById('section-name');
@@ -18,6 +16,7 @@
     ar: 'Augmented Reality',
     vr: 'Virtual Reality',
     'financial-app': 'Financial App',
+    'constellation-idea': 'Constellation Idea',
     prototype: 'Prototype'
   };
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -29,7 +28,7 @@
     const walker = document.createTreeWalker(view, NodeFilter.SHOW_TEXT);
     const textNodes = [];
     while (walker.nextNode()) {
-      if (/\S/.test(walker.currentNode.nodeValue) && !walker.currentNode.parentElement.closest('.carousel-section, .project-video, .project-gallery')) {
+      if (/\S/.test(walker.currentNode.nodeValue) && !walker.currentNode.parentElement.closest('.carousel-section, .project-video, .project-gallery, .idea-scroll')) {
         textNodes.push(walker.currentNode);
       }
     }
@@ -70,12 +69,15 @@
     view.inert = false;
   }
 
-  children.inert = true;
-  toggle.setAttribute('aria-expanded', 'false');
-  toggle.addEventListener('click', () => {
-    const expanded = toggle.getAttribute('aria-expanded') === 'true';
-    toggle.setAttribute('aria-expanded', String(!expanded));
-    children.inert = expanded;
+  document.querySelectorAll('.node-toggle').forEach((toggle) => {
+    const children = document.getElementById(toggle.getAttribute('aria-controls'));
+    children.inert = true;
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+      children.inert = expanded;
+    });
   });
 
   function showCurrentSection(animate) {
@@ -88,7 +90,7 @@
     const key = window.location.hash.slice(1);
     const name = Object.hasOwn(sections, key) ? sections[key] : null;
     const outgoing = [home, gamesView, projectView, sectionView].find((view) => !view.hidden);
-    const incoming = key === 'games' ? gamesView : key === 'ar' || key === 'vr' || key === 'financial-app' ? projectView : name ? sectionView : home;
+    const incoming = key === 'games' ? gamesView : key === 'ar' || key === 'vr' || key === 'financial-app' || key === 'constellation-idea' ? projectView : name ? sectionView : home;
 
     function show() {
       clearGlitch(outgoing);
@@ -131,10 +133,11 @@
         link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
     const destination = new URL(link.href);
     if (link.dataset.section) {
-      const expected = new URL(link.dataset.section === 'games' ? 'gamepage.html' : link.dataset.section === 'financial-app' ? 'index.html#financial-app' : 'portfolio_placeholder.html', window.location.href);
+      const isIndexSection = link.dataset.section === 'financial-app' || link.dataset.section === 'constellation-idea';
+      const expected = new URL(link.dataset.section === 'games' ? 'gamepage.html' : isIndexSection ? `index.html#${link.dataset.section}` : 'portfolio_placeholder.html', window.location.href);
       if (destination.origin !== expected.origin || destination.pathname !== expected.pathname ||
-          (link.dataset.section === 'financial-app' && (destination.search || destination.hash !== expected.hash)) ||
-          (link.dataset.section !== 'games' && link.dataset.section !== 'financial-app' && destination.searchParams.get('section') !== link.dataset.section) ||
+          (isIndexSection && (destination.search || destination.hash !== expected.hash)) ||
+          (link.dataset.section !== 'games' && !isIndexSection && destination.searchParams.get('section') !== link.dataset.section) ||
           (link.dataset.section === 'games' && destination.search)) return;
     } else if (destination.origin !== window.location.origin || destination.pathname !== window.location.pathname) {
       return;

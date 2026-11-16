@@ -28,6 +28,7 @@
   const description = document.getElementById('project-description');
   const player = document.getElementById('project-player');
   const layout = document.querySelector('.project-layout');
+  const idea = document.querySelector('.idea-scroll');
   const copy = document.querySelector('.project-copy');
   const video = document.querySelector('.project-video');
   const gallery = document.querySelector('.project-gallery');
@@ -159,6 +160,13 @@
   window.addEventListener('portfolio-section-change', (event) => {
     if (imageDialog.open) imageDialog.close();
     resetPlayer();
+    const isIdea = event.detail === 'constellation-idea';
+    layout.hidden = isIdea;
+    idea.hidden = !isIdea;
+    if (isIdea) {
+      name.textContent = 'Constellation Idea';
+      return;
+    }
     const currentProject = Object.hasOwn(projects, event.detail) ? projects[event.detail] : null;
     if (!currentProject) return;
     name.textContent = currentProject.name;

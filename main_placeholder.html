@@ -7,6 +7,7 @@
   <title>Felipe Gomes | Portfolio example</title>
   <link rel="stylesheet" href="main_placeholder.css">
   <link rel="stylesheet" href="portfolio_games.css">
+  <link rel="stylesheet" href="constellation_idea.css">
 </head>
 <body data-game-embedded>
   <canvas id="grid" aria-hidden="true"></canvas>
@@ -58,7 +59,16 @@
               </ul>
             </div>
           </li>
-          <li><a class="node" href="portfolio_placeholder.html?section=prototype" data-section="prototype"><span class="node-marker" aria-hidden="true"></span><span>Prototype</span><span class="node-arrow" aria-hidden="true">↗</span></a></li>
+          <li class="project-branch">
+            <button class="node node-toggle" type="button" aria-expanded="true" aria-controls="prototype-nodes">
+              <span class="node-marker" aria-hidden="true"></span><span>Prototype</span><span class="node-plus" aria-hidden="true"></span>
+            </button>
+            <div class="child-branch" id="prototype-nodes">
+              <ul class="child-nodes">
+                <li><a class="node child-node" href="index.html#constellation-idea" data-section="constellation-idea"><span class="node-marker" aria-hidden="true"></span><span>Constellation Idea</span><span class="node-arrow" aria-hidden="true">↗</span></a></li>
+              </ul>
+            </div>
+          </li>
         </ul>
       </nav>
       <p class="footer-note">Felipe Gomes <span aria-hidden="true">/</span> Games, art &amp; interactive experiences</p>
@@ -109,6 +119,29 @@
         <div class="project-gallery" hidden>
           <p class="section-label">Project images</p>
           <div class="project-image-grid" id="project-image-grid"></div>
+        </div>
+      </div>
+      <div class="idea-scroll" role="region" aria-label="Constellation idea progression" tabindex="0" hidden>
+        <div class="idea-grid">
+          <article class="idea-card">
+            <h2>01 / The beginning</h2>
+            <img src="assets/apps/prototype/Idea_1.png" alt="The portfolio's interactive network background">
+            <p>While developing the portfolio background, its connected points sparked an idea: what if the network became something to explore?</p>
+          </article>
+          <article class="idea-card">
+            <h2>02 / Wired connections</h2>
+            <a class="idea-image-link" href="wired_connections.html" target="_blank" rel="noopener noreferrer" aria-label="Explore Wired Connections (opens in a new tab)">
+              <img src="assets/apps/prototype/Idea_2.png" alt="A sphere of interconnected points">
+            </a>
+            <p>This was one direction for the idea. It wasn't quite the interaction I wanted, but I liked it and would love to build something with it.</p>
+          </article>
+          <article class="idea-card">
+            <h2>03 / Constellations</h2>
+            <a class="idea-image-link" href="constellations.html" target="_blank" rel="noopener noreferrer" aria-label="Explore Constellations (opens in a new tab)">
+              <img src="assets/apps/prototype/Idea_3.png" alt="Stars connected into constellations">
+            </a>
+            <p>The idea took shape by turning the connections into stars and a constellation visualization. There are still more branches to explore.</p>
+          </article>
         </div>
       </div>
       <p class="footer-note">&copy; 2026 Felipe Gomes - @satsuyafrango. All rights reserved.</p>

@@ -651,6 +651,7 @@
     setListOpen(false, true);
     setPanelOpen(detailsPanel, true);
     positionDetails();
+    window.dispatchEvent(new Event('constellation-panel-open'));
   }
 
   function rotateVector(vector, axis, angle) {
