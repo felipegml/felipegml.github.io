@@ -31,7 +31,20 @@
 }
 
 .idea-image-link {
+  position: relative;
   display: block;
+}
+
+.idea-image-label {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  left: 1px;
+  padding: 10px 12px;
+  background: rgba(15, 14, 13, 0.85);
+  color: #eeeae6;
+  font-size: 0.85rem;
+  text-align: center;
 }
 
 .idea-image-link:hover img, .idea-image-link:focus-visible img {
@@ -52,4 +65,9 @@
   @media (max-width: 600px) {
     .idea-scroll { margin-top: 32px; }
   }
+}
+
+@media (max-width: 760px) and (orientation: portrait) {
+  .idea-scroll { overflow-x: visible; }
+  .idea-grid { grid-template-columns: minmax(0, 1fr); }
 }
