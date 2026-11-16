@@ -9,10 +9,28 @@
 </head>
 <body data-sky="constellations">
   <canvas id="field" tabindex="0" role="application" aria-label="Interactive constellation sphere" aria-describedby="sphere-hint"></canvas>
-  <p id="constellation-info" role="status" hidden></p>
-  <p id="sphere-hint">Drag, swipe, or use the arrow keys to rotate. Hover or tap a constellation to identify it.</p>
+  <p id="constellation-info" role="status" aria-live="polite"></p>
+  <button id="constellation-list-toggle" type="button" aria-expanded="false" aria-controls="constellation-list-panel">Constellations</button>
+  <section id="constellation-list-panel" class="sky-panel" aria-label="Constellations" aria-hidden="true" inert>
+    <div class="sky-panel-heading">
+      <div><p class="sky-eyebrow">Explore the sky</p><h2>Constellations</h2></div>
+      <button class="sky-close" id="constellation-list-close" type="button" aria-label="Close constellation list">&times;</button>
+    </div>
+    <p class="sky-panel-note">Choose a figure to look towards it.</p>
+    <div id="constellation-list"></div>
+  </section>
+  <section id="constellation-details" class="sky-panel" aria-labelledby="constellation-details-name" aria-hidden="true" inert>
+    <div class="sky-panel-heading">
+      <div><p class="sky-eyebrow">Constellation</p><h2 id="constellation-details-name"></h2></div>
+      <button class="sky-close" id="constellation-details-close" type="button" aria-label="Close constellation details">&times;</button>
+    </div>
+    <dl id="constellation-details-facts"></dl>
+  </section>
+  <p id="sphere-hint">Drag or swipe to look around. <span class="sky-hover-hint">Hover or tap</span><span class="sky-touch-hint">Tap</span> a constellation to identify it.</p>
   <p id="sky-error" role="alert" hidden>Unable to load the constellation data.</p>
   <script src="constellation_data.js"></script>
+  <script src="constellation_facts.js"></script>
+  <script src="constellation_distances.js"></script>
   <script src="main_placeholder_connect.js"></script>
 </body>
 </html>

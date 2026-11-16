@@ -6,7 +6,7 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const isConstellationSky = document.body.dataset.sky === 'constellations';
   const sky = isConstellationSky ? window.constellationSky : null;
-  if (isConstellationSky && !sky) {
+  if (isConstellationSky && (!sky || !window.constellationFacts || !window.constellationDistances)) {
     document.getElementById('sky-error').hidden = false;
     console.error('Unable to load the constellation sky data.');
     return;
@@ -39,7 +39,12 @@
   const triangles = [];
   const adjacency = [];
   const constellationInfo = sky ? document.getElementById('constellation-info') : null;
+  const listToggle = sky ? document.getElementById('constellation-list-toggle') : null;
+  const listPanel = sky ? document.getElementById('constellation-list-panel') : null;
+  const detailsPanel = sky ? document.getElementById('constellation-details') : null;
+  const figureStars = sky ? sky.labels.map(() => new Set()) : null;
   let hoveredConstellation = null, selectedConstellation = null;
+  let cameraFlight = null, detailsAnchor = null;
 
   function normalize(x, y, z) {
     const length = Math.hypot(x, y, z);
@@ -115,6 +120,10 @@
     }
     for (const [a, b, constellations] of sky.lines) {
       edges.push({ a, b, constellations, alpha: 1, target: 1, d: 0 });
+      for (const index of constellations) {
+        figureStars[index].add(a);
+        figureStars[index].add(b);
+      }
       edgeKeys.add(Math.min(a, b) * nodes.length + Math.max(a, b));
     }
 
@@ -218,11 +227,12 @@
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     w = window.innerWidth;
     h = window.innerHeight;
-    focal = Math.max(1, h / 2);
+    focal = Math.max(1, h / 2 * (sky ? 1.24 : 1));
     canvas.width = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     render(0, true);
+    if (detailsAnchor) positionDetails();
   }
 
   function projectNodes(dt, instant) {
@@ -527,6 +537,7 @@
     const dt = Math.min((now - last) / 16.667 || 1, 3);
     last = now;
     time += 0.016 * dt;
+    if (cameraFlight) updateCameraFlight(now);
     render(dt, false);
     rafId = requestAnimationFrame(frame);
   }
@@ -536,6 +547,7 @@
     rafId = 0;
     if (document.hidden) return;
     if (reduceMotion.matches) {
+      if (cameraFlight) updateCameraFlight(cameraFlight.start + 900);
       pulses.length = 0;
       ripples.length = 0;
       for (const node of nodes) {
@@ -575,8 +587,155 @@
 
   function updateConstellationInfo() {
     const index = hoveredConstellation === null ? selectedConstellation : hoveredConstellation;
-    constellationInfo.hidden = index === null;
+    constellationInfo.classList.toggle('is-visible', index !== null);
     constellationInfo.textContent = index === null ? '' : sky.labels[index][0];
+  }
+
+  function setPanelOpen(panel, open) {
+    panel.classList.toggle('is-open', open);
+    panel.setAttribute('aria-hidden', String(!open));
+    if (open) panel.removeAttribute('inert');
+    else panel.setAttribute('inert', '');
+  }
+
+  function closeDetails() {
+    if (detailsPanel.contains(document.activeElement)) canvas.focus();
+    setPanelOpen(detailsPanel, false);
+    detailsAnchor = null;
+  }
+
+  function setListOpen(open, restoreFocus) {
+    if (!open && restoreFocus && listPanel.contains(document.activeElement)) listToggle.focus();
+    setPanelOpen(listPanel, open);
+    listToggle.setAttribute('aria-expanded', String(open));
+    if (open) document.getElementById('constellation-list-close').focus();
+  }
+
+  function addFact(list, title, value) {
+    const term = document.createElement('dt');
+    const description = document.createElement('dd');
+    term.textContent = title;
+    description.textContent = value;
+    list.append(term, description);
+  }
+
+  function positionDetails() {
+    const margin = 16, gap = 18;
+    const width = detailsPanel.offsetWidth, height = detailsPanel.offsetHeight;
+    let left = detailsAnchor.x + gap;
+    let top = detailsAnchor.y + gap;
+    if (left + width > w - margin) left = detailsAnchor.x - width - gap;
+    if (top + height > h - margin) top = detailsAnchor.y - height - gap;
+    left = Math.max(margin, Math.min(left, w - width - margin));
+    top = Math.max(margin, Math.min(top, h - height - margin));
+    detailsPanel.style.setProperty('--details-left', left + 'px');
+    detailsPanel.style.setProperty('--details-top', top + 'px');
+  }
+
+  function showDetails(index, x, y) {
+    const [name, ra, dec] = sky.labels[index];
+    const facts = window.constellationFacts[name];
+    const distance = window.constellationDistances[name];
+    const list = document.getElementById('constellation-details-facts');
+    document.getElementById('constellation-details-name').textContent = name;
+    list.replaceChildren();
+    addFact(list, 'Stars in this figure', String(figureStars[index].size));
+    addFact(list, 'Map position (J2000)', 'RA ' + ra + '°, Dec ' + dec + '°');
+    if (facts && facts.history) addFact(list, 'Historical note', facts.history);
+    if (distance) {
+      const [hip, lightYears, uncertainty] = distance;
+      addFact(list, 'Example figure star distance',
+        'HIP ' + hip + ': approximately ' + lightYears + ' ± ' + uncertainty + ' light-years (1σ).');
+    }
+    detailsAnchor = { x, y };
+    setListOpen(false, true);
+    setPanelOpen(detailsPanel, true);
+    positionDetails();
+  }
+
+  function rotateVector(vector, axis, angle) {
+    const c = Math.cos(angle), s = Math.sin(angle);
+    const dot = axis.x * vector.x + axis.y * vector.y + axis.z * vector.z;
+    return normalize(
+      vector.x * c + (axis.y * vector.z - axis.z * vector.y) * s + axis.x * dot * (1 - c),
+      vector.y * c + (axis.z * vector.x - axis.x * vector.z) * s + axis.y * dot * (1 - c),
+      vector.z * c + (axis.x * vector.y - axis.y * vector.x) * s + axis.z * dot * (1 - c)
+    );
+  }
+
+  function updateCameraFlight(now) {
+    const flight = cameraFlight;
+    const progress = Math.min(1, (now - flight.start) / 900);
+    const eased = progress * progress * (3 - 2 * progress);
+    for (const key of ['right', 'up', 'forward']) {
+      camera[key] = rotateVector(flight.basis[key], flight.axis, flight.angle * eased);
+    }
+    if (progress === 1) cameraFlight = null;
+  }
+
+  function focusConstellation(index) {
+    cameraFlight = null;
+    const [, ra, dec] = sky.labels[index];
+    const target = celestialDirection(ra, dec);
+    const forward = camera.forward;
+    const cross = {
+      x: forward.y * target.z - forward.z * target.y,
+      y: forward.z * target.x - forward.x * target.z,
+      z: forward.x * target.y - forward.y * target.x
+    };
+    const length = Math.hypot(cross.x, cross.y, cross.z);
+    const dot = Math.max(-1, Math.min(1, forward.x * target.x + forward.y * target.y + forward.z * target.z));
+    if (length < 1e-10 && dot > 0) return;
+    const axis = length < 1e-10 ? camera.up : normalize(cross.x, cross.y, cross.z);
+    cameraFlight = {
+      axis,
+      angle: Math.acos(dot),
+      basis: { right: { ...camera.right }, up: { ...camera.up }, forward: { ...camera.forward } },
+      start: performance.now()
+    };
+    if (reduceMotion.matches) {
+      updateCameraFlight(cameraFlight.start + 900);
+      redrawIfStill();
+    }
+  }
+
+  function initializeConstellationControls() {
+    const list = document.getElementById('constellation-list');
+    sky.labels.forEach(([name], index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = name;
+      button.addEventListener('click', () => {
+        setListOpen(false, true);
+        closeDetails();
+        hoveredConstellation = null;
+        selectedConstellation = index;
+        pointer.active = false;
+        updateConstellationInfo();
+        focusConstellation(index);
+      });
+      list.append(button);
+    });
+    listToggle.addEventListener('click', () => {
+      const open = listToggle.getAttribute('aria-expanded') !== 'true';
+      if (open) closeDetails();
+      setListOpen(open, true);
+    });
+    document.getElementById('constellation-list-close').addEventListener('click', () => setListOpen(false, true));
+    document.getElementById('constellation-details-close').addEventListener('click', () => {
+      closeDetails();
+      selectedConstellation = null;
+      updateConstellationInfo();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      if (listToggle.getAttribute('aria-expanded') === 'true') setListOpen(false, true);
+      else if (detailsPanel.classList.contains('is-open')) {
+        closeDetails();
+        selectedConstellation = null;
+        updateConstellationInfo();
+      }
+    });
   }
 
   function rotate(dx, dy) {
@@ -600,6 +759,7 @@
 
   canvas.addEventListener('pointerdown', (event) => {
     if (drag || (event.pointerType === 'mouse' && event.button !== 0)) return;
+    cameraFlight = null;
     drag = { id: event.pointerId, x: event.clientX, y: event.clientY, startX: event.clientX, startY: event.clientY, moved: false };
     if (sky) {
       hoveredConstellation = null;
@@ -618,7 +778,14 @@
   canvas.addEventListener('pointermove', (event) => {
     if (drag && event.pointerId !== drag.id) return;
     if (drag) {
-      if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 8) drag.moved = true;
+      if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 8 && !drag.moved) {
+        drag.moved = true;
+        if (sky) {
+          closeDetails();
+          selectedConstellation = null;
+          updateConstellationInfo();
+        }
+      }
       rotate(event.clientX - drag.x, event.clientY - drag.y);
       drag.x = event.clientX;
       drag.y = event.clientY;
@@ -644,6 +811,8 @@
     if (sky && event.type === 'pointerup' && !drag.moved
       && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) <= 8) {
       selectedConstellation = constellationAt(event.clientX, event.clientY);
+      if (selectedConstellation === null) closeDetails();
+      else showDetails(selectedConstellation, event.clientX, event.clientY);
     }
     drag = null;
     canvas.classList.remove('dragging');
@@ -672,6 +841,7 @@
   });
   canvas.addEventListener('keydown', (event) => {
     const step = focal * 0.12;
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) cameraFlight = null;
     if (event.key === 'ArrowLeft') rotate(step, 0);
     else if (event.key === 'ArrowRight') rotate(-step, 0);
     else if (event.key === 'ArrowUp') rotate(0, step);
@@ -684,7 +854,10 @@
   document.addEventListener('visibilitychange', start);
   reduceMotion.addEventListener('change', start);
 
-  if (sky) buildConstellationSky(); else buildSphere();
+  if (sky) {
+    buildConstellationSky();
+    initializeConstellationControls();
+  } else buildSphere();
   resize();
   start();
 })();

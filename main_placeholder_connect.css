@@ -38,6 +38,8 @@ canvas:focus-visible {
   pointer-events: none;
 }
 
+.sky-touch-hint { display: none; }
+
 #sky-error {
   position: fixed;
   inset: 1rem;
@@ -49,16 +51,193 @@ canvas:focus-visible {
   position: fixed;
   top: max(1rem, env(safe-area-inset-top));
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -5px);
   margin: 0;
-  padding: 0.55rem 1rem;
-  max-width: calc(100% - 2rem);
-  border: 1px solid rgba(225, 250, 255, 0.2);
-  border-radius: 0.5rem;
-  background: rgba(0, 0, 0, 0.5);
+  padding: 0.55rem 0.9rem;
+  max-width: calc(100% - 12rem);
+  border: 1px solid rgba(0, 229, 255, 0.24);
+  background: rgba(5, 8, 16, 0.9);
+  box-shadow: 0 0 22px rgba(0, 229, 255, 0.1);
   color: #e1faff;
-  font: 600 1rem/1.4 "Trebuchet MS", Arial, sans-serif;
-  letter-spacing: 0.03em;
+  font: 600 0.8rem/1.4 "Trebuchet MS", Arial, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   text-align: center;
   pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 220ms ease, transform 220ms ease, visibility 0s linear 220ms;
+}
+
+#constellation-info.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition: opacity 220ms ease, transform 220ms ease, visibility 0s;
+}
+
+#constellation-list-toggle, .sky-close, #constellation-list button {
+  font: inherit;
+  cursor: pointer;
+}
+
+#constellation-list-toggle {
+  position: fixed;
+  top: max(1rem, env(safe-area-inset-top));
+  right: max(1rem, env(safe-area-inset-right));
+  min-height: 44px;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  background: rgba(5, 8, 16, 0.9);
+  color: #e1faff;
+  font: 600 0.72rem/1.2 "Trebuchet MS", Arial, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+#constellation-list-toggle:hover, #constellation-list-toggle:focus-visible,
+.sky-close:hover, .sky-close:focus-visible, #constellation-list button:hover,
+#constellation-list button:focus-visible {
+  border-color: #00e5ff;
+  color: #fff;
+  outline: 2px solid #00e5ff;
+  outline-offset: 2px;
+}
+
+.sky-panel {
+  position: fixed;
+  z-index: 2;
+  box-sizing: border-box;
+  width: min(21rem, calc(100vw - 2rem));
+  max-height: min(70vh, 34rem);
+  max-height: min(70dvh, 34rem);
+  overflow: auto;
+  padding: 1rem;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  background: rgba(5, 8, 16, 0.96);
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.12), 0 14px 36px rgba(0, 0, 0, 0.55);
+  color: #e1faff;
+  font: 0.85rem/1.5 "Trebuchet MS", Arial, sans-serif;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition: opacity 220ms ease, transform 220ms ease, visibility 0s linear 220ms;
+}
+
+.sky-panel.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition: opacity 220ms ease, transform 220ms ease, visibility 0s;
+}
+
+#constellation-list-panel {
+  top: calc(max(1rem, env(safe-area-inset-top)) + 3.4rem);
+  right: max(1rem, env(safe-area-inset-right));
+}
+
+#constellation-details {
+  left: var(--details-left, 50%);
+  top: var(--details-top, 50%);
+}
+
+.sky-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sky-panel h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.sky-eyebrow {
+  margin: 0 0 0.3rem;
+  color: #00e5ff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sky-close {
+  flex: 0 0 2rem;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  background: transparent;
+  color: #e1faff;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.sky-panel-note {
+  margin: 0.8rem 0;
+  color: #b6c4d6;
+  font-size: 0.75rem;
+}
+
+#constellation-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+#constellation-list button {
+  min-height: 40px;
+  padding: 0.5rem;
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  background: rgba(0, 229, 255, 0.04);
+  color: #d7e9ef;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+#constellation-details dl {
+  margin: 0.9rem 0 0;
+}
+
+#constellation-details dt {
+  margin-top: 0.6rem;
+  color: #83aebb;
+  font-size: 0.68rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+#constellation-details dd {
+  margin: 0.1rem 0 0;
+}
+
+@media (hover: none), (max-width: 600px) {
+  .sky-hover-hint { display: none; }
+  .sky-touch-hint { display: inline; }
+
+  #constellation-details {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, calc(-50% - 6px));
+  }
+
+  #constellation-details.is-open {
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (max-width: 420px) {
+  #constellation-info {
+    top: calc(max(1rem, env(safe-area-inset-top)) + 3.4rem);
+    max-width: calc(100% - 2rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #constellation-info, #constellation-info.is-visible, #constellation-list-toggle,
+  .sky-panel, .sky-panel.is-open { transition: none; }
 }
